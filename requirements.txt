@@ -3,3 +3,4 @@ uvicorn
 safetensors
 python-multipart
 Pillow
+Jinja2
