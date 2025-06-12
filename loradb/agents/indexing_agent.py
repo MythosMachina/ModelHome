@@ -14,7 +14,7 @@ class IndexingAgent:
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.conn = sqlite3.connect(self.db_path)
         recreated = self._ensure_table()
-        if recreated:
+        if recreated or self._is_index_empty():
             self.reindex_all()
 
     def _ensure_table(self) -> bool:
@@ -44,6 +44,13 @@ class IndexingAgent:
         )
         self.conn.commit()
         return recreated
+
+    def _is_index_empty(self) -> bool:
+        """Return True if the index table has no rows."""
+        cur = self.conn.cursor()
+        cur.execute("SELECT COUNT(*) FROM lora_index")
+        count = cur.fetchone()[0]
+        return count == 0
 
     def add_metadata(self, data: Dict[str, str]) -> None:
         self.conn.execute(
