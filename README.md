@@ -1,106 +1,66 @@
-# LoRA Database Interface
+# LoRA Database Web Interface
 
-A web-based management platform for LoRA files (.safetensors) with preview support, metadata extraction, and advanced search features.
+This project provides a minimal FastAPI application for organising LoRA files (`.safetensors`) along with preview images.  It allows uploading new LoRA models, automatically extracts their metadata and stores it in a small SQLite based search index.  A simple gallery interface lets you browse the models, search by name or tag and download or remove files.
 
----
+## Features
 
-## ✨ Features
+- **Upload LoRA files** – multiple `.safetensors` files can be uploaded at once.
+- **Upload preview archives** – a ZIP file containing preview images is extracted and matched to the corresponding LoRA by filename.
+- **Metadata extraction** – basic metadata is read from each safetensors file and stored in a full text search (FTS5) table.
+- **Searchable gallery** – browse all indexed LoRAs in a grid view and filter by query.
+- **Detail view** – see all previews, metadata and a download link for a single LoRA.
+- **File removal** – delete LoRA files or individual preview images from the interface.
 
-* ⬆️ **Bulk Upload** of `.safetensors` LoRA files
-* 📦 **Preview Upload via ZIP** for each LoRA
-* 🌐 **Dark Mode Interface** in modern grid gallery design
-* ⚙️ **Automatic Metadata Extraction** including training tags
-* ⚡ **Search by Name and Tags**, powered by indexed metadata
-* 🎭 **Grid View** of LoRAs with randomized preview thumbnails
-* 🔍 **Individual LoRA View** with:
-
-  * Gallery of all previews
-  * Metadata summary
-  * Direct download link
-* 📋 **Structured API-ready backend** (Flask/FastAPI compatible)
-
----
-
-## 📃 Project Structure
+## Project layout
 
 ```
-/loradb
-|-- /uploads                # Uploaded safetensors and preview images
-|-- /static                 # Static frontend assets
-|-- /templates              # Jinja2 or frontend framework views
-|-- /api                    # REST API endpoints
-|-- /agents                 # Logic for upload, metadata, indexing
-|-- /search_index           # Tag/Name search database
-|-- main.py                 # Webserver entrypoint
-|-- config.py               # Config and environment variables
-|-- requirements.txt        # Python dependencies
+loradb/
+├── agents/            # upload, metadata and search logic
+├── api/               # FastAPI routes
+├── static/            # CSS for the HTML templates
+├── templates/         # Jinja2 templates for the web pages
+├── uploads/           # stored LoRA files and preview images
+└── search_index/      # SQLite database for the search index
+main.py                # application entry point
+config.py              # path configuration used by the app
+requirements.txt       # Python dependencies
 ```
 
----
+## Installation
 
-## ⚡ Quick Start
+1. Clone the repository and change into the project folder:
 
-```bash
-# 1. Clone Repository
-$ git clone https://github.com/AsaTyr2018/MyLora.git
-$ cd MyLora
+   ```bash
+   git clone https://github.com/AsaTyr2018/MyLora.git
+   cd MyLora
+   ```
 
-# 2. Install Dependencies
-$ python -m venv venv
-$ source venv/bin/activate
-$ pip install -r requirements.txt
+2. Create a virtual environment (optional but recommended) and install the dependencies:
 
-# 3. Run Web Interface
-$ python main.py
-```
+   ```bash
+   python -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   ```
 
-Default port: `http://ServerIP:5000`
+3. Start the web application:
 
-### API Endpoints
+   ```bash
+   python main.py
+   ```
 
-* `POST /upload` - upload one or more `.safetensors` files
-* `POST /upload_previews` - upload a zip containing preview images
-* `GET /search?query=<term>` - search indexed metadata
-* `GET /grid` - simple gallery view of all indexed files
+   The interface is available on [http://localhost:5000](http://localhost:5000).
 
----
+## Usage
 
-## 🔐 Example: LoRA Grid View
+- **Upload models**: open `/upload` and select one or more `.safetensors` files.  Each file is stored in `loradb/uploads` and indexed automatically.
+- **Upload previews**: open `/upload_previews` to upload a ZIP containing images.  Files named `mylora.png`, `mylora_1.png`, ... will be placed next to `mylora.safetensors` and shown in the gallery.
+- **Browse and search**: the `/grid` page lists all indexed LoRAs. Use the search box to filter by filename or tags.
+- **Detail view**: click a LoRA in the gallery to view all previews and metadata.  A download button is provided to retrieve the original file.
+- **Delete files**: tick the checkboxes in the gallery or detail view and press *Remove Selected* to delete the chosen files.
 
-Displays all uploaded LoRA models in a grid. Each cell includes:
-
-* Random preview image
-* LoRA name
-* Click opens detailed page
-
-![Example Grid](docs/grid-example.png)
+The web pages use Bootstrap via a CDN and are rendered with Jinja2 templates.  The application keeps all data locally on disk in the `loradb` directory.
 
 ---
-
-## 🧰 Built With
-
-* **Python** (Flask or FastAPI)
-* **SQLite / ElasticSearch** for indexing
-* **TailwindCSS / Vue / React** frontend (Dark Mode)
-* **Pillow / Safetensors** for metadata extraction
-
----
-
-## ✈ Roadmap
-
-* [ ] Planning
-* [ ] Upload + Metadata Extraction
-* [ ] Grid Gallery with Dark Mode
-* [ ] Tag- & Name-Based Search
-* [ ] REST API Access
-* [ ] User Management & Favorites
-* [ ] Drag-and-Drop Upload with Progress Bar
-
----
-
-## 📄 License
 
 MIT License
-
----
-
