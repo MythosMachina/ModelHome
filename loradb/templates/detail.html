@@ -9,7 +9,7 @@
 <div class="table-responsive">
   <table class="table table-dark table-striped metadata-table">
     <tbody>
-      {% for key, value in entry.metadata.items() %}
+      {% for key, value in entry.metadata|dictsort %}
       <tr><th>{{ key }}</th><td>{{ value }}</td></tr>
       {% endfor %}
     </tbody>
