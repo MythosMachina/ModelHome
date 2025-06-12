@@ -1,5 +1,5 @@
-from fastapi import APIRouter, UploadFile, File
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, UploadFile, File, Request
+from fastapi.responses import HTMLResponse, RedirectResponse
 from pathlib import Path
 
 import config
@@ -16,14 +16,23 @@ extractor = MetadataExtractorAgent()
 indexer = IndexingAgent()
 frontend = FrontendAgent(Path(uploader.upload_dir), Path(config.TEMPLATE_DIR))
 
+
+@router.get('/upload', response_class=HTMLResponse)
+async def upload_form():
+    """Render HTML form for file uploads."""
+    return frontend.env.get_template('upload.html').render(title='Upload')
+
 @router.post('/upload')
-async def upload(files: list[UploadFile] = File(...)):
+async def upload(request: Request, files: list[UploadFile] = File(...)):
     saved_paths = uploader.save_files(files)
     results = []
     for path in saved_paths:
         meta = extractor.extract(Path(path))
         indexer.add_metadata(meta)
         results.append(meta)
+    # HTML uploads redirect to gallery
+    if 'text/html' in request.headers.get('accept', ''):
+        return RedirectResponse(url='/grid', status_code=303)
     return results
 
 @router.get('/search')
