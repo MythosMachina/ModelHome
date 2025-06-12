@@ -2,6 +2,9 @@
 
 This project provides a minimal FastAPI application for organising LoRA files (`.safetensors`) along with preview images.  It allows uploading new LoRA models, automatically extracts their metadata and stores it in a small SQLite based search index.  A simple gallery interface lets you browse the models, search by name or tag and download or remove files.
 
+## Preview
+![grafik](https://github.com/user-attachments/assets/7dee8a00-085b-40f0-a545-9d171833e69b)
+
 ## Features
 
 - **Upload LoRA files** – multiple `.safetensors` files can be uploaded at once.
