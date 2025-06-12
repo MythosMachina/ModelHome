@@ -99,3 +99,11 @@ class IndexingAgent:
         for file in uploads.glob("*.safetensors"):
             meta = extractor.extract(file)
             self.add_metadata(meta)
+
+    def remove_metadata(self, filename: str) -> None:
+        """Remove a LoRA entry from the index by filename."""
+        self.conn.execute(
+            "DELETE FROM lora_index WHERE filename = ?",
+            (filename,),
+        )
+        self.conn.commit()
