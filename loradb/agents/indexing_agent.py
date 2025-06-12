@@ -3,6 +3,9 @@ from typing import Dict, List
 import sqlite3
 from pathlib import Path
 
+import config
+from .metadata_extractor_agent import MetadataExtractorAgent
+
 class IndexingAgent:
     """Maintain search index for LoRA metadata using SQLite FTS5."""
 
@@ -10,17 +13,24 @@ class IndexingAgent:
         self.db_path = Path(db_path or "loradb/search_index/index.db")
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.conn = sqlite3.connect(self.db_path)
-        self._ensure_table()
+        recreated = self._ensure_table()
+        if recreated:
+            self.reindex_all()
 
-    def _ensure_table(self) -> None:
+    def _ensure_table(self) -> bool:
         cur = self.conn.cursor()
         # Check existing table schema; recreate if outdated
         cur.execute("PRAGMA table_info(lora_index)")
         cols = [r[1] for r in cur.fetchall()]
         required = ["filename", "name", "architecture", "tags", "base_model"]
-        if cols and cols != required:
+        recreated = False
+        if not cols:
+            # Table did not exist, we'll need to index from scratch
+            recreated = True
+        elif cols != required:
             # Existing table uses an old schema, drop it so we can recreate
             cur.execute("DROP TABLE IF EXISTS lora_index")
+            recreated = True
         cur.execute(
             """
             CREATE VIRTUAL TABLE IF NOT EXISTS lora_index USING fts5(
@@ -33,6 +43,7 @@ class IndexingAgent:
             """
         )
         self.conn.commit()
+        return recreated
 
     def add_metadata(self, data: Dict[str, str]) -> None:
         self.conn.execute(
@@ -71,3 +82,13 @@ class IndexingAgent:
             }
             for r in rows
         ]
+
+    def reindex_all(self) -> None:
+        """Index all safetensors files found in the upload directory."""
+        uploads = Path(config.UPLOAD_DIR)
+        if not uploads.exists():
+            return
+        extractor = MetadataExtractorAgent()
+        for file in uploads.glob("*.safetensors"):
+            meta = extractor.extract(file)
+            self.add_metadata(meta)
