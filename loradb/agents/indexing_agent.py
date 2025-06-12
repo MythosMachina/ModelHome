@@ -14,6 +14,13 @@ class IndexingAgent:
 
     def _ensure_table(self) -> None:
         cur = self.conn.cursor()
+        # Check existing table schema; recreate if outdated
+        cur.execute("PRAGMA table_info(lora_index)")
+        cols = [r[1] for r in cur.fetchall()]
+        required = ["filename", "name", "architecture", "tags", "base_model"]
+        if cols and cols != required:
+            # Existing table uses an old schema, drop it so we can recreate
+            cur.execute("DROP TABLE IF EXISTS lora_index")
         cur.execute(
             """
             CREATE VIRTUAL TABLE IF NOT EXISTS lora_index USING fts5(
