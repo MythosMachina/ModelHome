@@ -1,29 +1,37 @@
 from pathlib import Path
 from typing import List, Dict
+import random
+
+from jinja2 import Environment, FileSystemLoader
 
 
 class FrontendAgent:
-    """Render simple HTML views for the LoRA gallery."""
+    """Render HTML views for the LoRA gallery using Bootstrap."""
 
-    def __init__(self, uploads_dir: Path) -> None:
+    def __init__(self, uploads_dir: Path, template_dir: Path) -> None:
         self.uploads_dir = uploads_dir
+        self.env = Environment(loader=FileSystemLoader(template_dir))
+
+    def _find_previews(self, stem: str) -> List[str]:
+        patterns = [f"{stem}.png", f"{stem}.jpg", f"{stem}.*.png", f"{stem}.*.jpg"]
+        matches: List[str] = []
+        for pattern in patterns:
+            matches.extend([str(p) for p in self.uploads_dir.glob(pattern)])
+        # convert to URLs
+        return [f"/uploads/{Path(m).name}" for m in matches]
 
     def render_grid(self, entries: List[Dict[str, str]]) -> str:
-        cells = []
         for e in entries:
-            name = e.get("name") or e.get("filename")
-            cells.append(
-                f"<div class='cell'><p>{name}</p></div>"
-            )
-        grid_html = """
-        <html><head><style>
-        body{background:#111;color:#eee;font-family:sans-serif}
-        .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
-        .cell{background:#222;padding:10px;border-radius:5px;text-align:center}
-        </style></head><body>
-        <h1>LoRA Gallery</h1>
-        <div class='grid'>
-        """
-        grid_html += "\n".join(cells)
-        grid_html += "</div></body></html>"
-        return grid_html
+            stem = Path(e.get("filename", "")).stem
+            previews = self._find_previews(stem)
+            e["preview_url"] = random.choice(previews) if previews else None
+        template = self.env.get_template("grid.html")
+        return template.render(title="LoRA Gallery", entries=entries)
+
+    def render_detail(self, entry: Dict[str, str]) -> str:
+        stem = Path(entry.get("filename", "")).stem
+        previews = self._find_previews(stem)
+        entry["previews"] = previews
+        entry.setdefault("metadata", {})
+        template = self.env.get_template("detail.html")
+        return template.render(title=entry.get("name"), entry=entry)

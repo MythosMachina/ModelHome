@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
+from jinja2 import Environment, FileSystemLoader
 
 import config
 from loradb.api import router as api_router
@@ -9,15 +10,18 @@ from loradb.api import router as api_router
 app = FastAPI(title="LoRA Database")
 
 app.mount("/static", StaticFiles(directory=config.STATIC_DIR), name="static")
+app.mount("/uploads", StaticFiles(directory=config.UPLOAD_DIR), name="uploads")
 
 UPLOAD_DIR = Path(config.UPLOAD_DIR)
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+env = Environment(loader=FileSystemLoader(config.TEMPLATE_DIR))
 
 app.include_router(api_router)
 
 @app.get("/", response_class=HTMLResponse)
 async def index():
-    return "<h1>LoRA Database</h1><p>Upload endpoint: /upload</p><p><a href='/grid'>View Gallery</a></p>"
+    template = env.get_template("index.html")
+    return template.render(title="LoRA Database")
 
 
 if __name__ == "__main__":
