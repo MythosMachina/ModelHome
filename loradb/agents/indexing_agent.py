@@ -15,17 +15,30 @@ class IndexingAgent:
     def _ensure_table(self) -> None:
         cur = self.conn.cursor()
         cur.execute(
-            "CREATE VIRTUAL TABLE IF NOT EXISTS lora_index USING fts5(filename, name, tags)"
+            """
+            CREATE VIRTUAL TABLE IF NOT EXISTS lora_index USING fts5(
+                filename,
+                name,
+                architecture,
+                tags,
+                base_model
+            )
+            """
         )
         self.conn.commit()
 
     def add_metadata(self, data: Dict[str, str]) -> None:
         self.conn.execute(
-            "INSERT INTO lora_index(filename, name, tags) VALUES (?, ?, ?)",
+            """
+            INSERT INTO lora_index(filename, name, architecture, tags, base_model)
+            VALUES (?, ?, ?, ?, ?)
+            """,
             (
                 data.get("filename", ""),
-                data.get("name", ""),
-                data.get("tags", ""),
+                data.get("modelspec.title", ""),
+                data.get("modelspec.architecture", ""),
+                data.get("ss_tag_frequency", ""),
+                data.get("ss_base_model_version", ""),
             ),
         )
         self.conn.commit()
@@ -34,11 +47,20 @@ class IndexingAgent:
         cur = self.conn.cursor()
         if query == "*":
             rows = cur.execute(
-                "SELECT filename, name, tags FROM lora_index"
+                "SELECT filename, name, architecture, tags, base_model FROM lora_index"
             ).fetchall()
         else:
             rows = cur.execute(
-                "SELECT filename, name, tags FROM lora_index WHERE lora_index MATCH ?",
+                "SELECT filename, name, architecture, tags, base_model FROM lora_index WHERE lora_index MATCH ?",
                 (query,),
             ).fetchall()
-        return [{"filename": r[0], "name": r[1], "tags": r[2]} for r in rows]
+        return [
+            {
+                "filename": r[0],
+                "name": r[1],
+                "architecture": r[2],
+                "tags": r[3],
+                "base_model": r[4],
+            }
+            for r in rows
+        ]
