@@ -1,19 +1,19 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1 class="mb-4">{{ entry.name or entry.filename }}</h1>
-<div class="row mb-3">
+<div class="preview-grid mb-3">
   {% for img in entry.previews %}
-  <div class="col-6 col-md-4 col-lg-3 mb-2">
-    <a href="{{ img }}" target="_blank"><img src="{{ img }}" class="img-fluid rounded"></a>
-  </div>
+  <a href="{{ img }}" target="_blank"><img src="{{ img }}" class="img-fluid rounded"></a>
   {% endfor %}
 </div>
-<table class="table table-dark table-striped">
-  <tbody>
-    {% for key, value in entry.metadata.items() %}
-    <tr><th>{{ key }}</th><td>{{ value }}</td></tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="table-responsive">
+  <table class="table table-dark table-striped metadata-table">
+    <tbody>
+      {% for key, value in entry.metadata.items() %}
+      <tr><th>{{ key }}</th><td>{{ value }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 <a class="btn btn-primary" href="/uploads/{{ entry.filename }}" download>Download</a>
 {% endblock %}
