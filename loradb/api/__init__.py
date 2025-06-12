@@ -54,9 +54,12 @@ async def search(query: str):
     return indexer.search(query)
 
 @router.get('/grid', response_class=HTMLResponse)
-async def grid():
-    entries = indexer.search('*')
-    return frontend.render_grid(entries)
+async def grid(request: Request):
+    query = request.query_params.get('q', '*')
+    if not query:
+        query = '*'
+    entries = indexer.search(query)
+    return frontend.render_grid(entries, query=query if query != '*' else '')
 
 
 @router.get('/detail/{filename}', response_class=HTMLResponse)
