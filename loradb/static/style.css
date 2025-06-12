@@ -35,6 +35,13 @@ h1 { margin-top: 1rem; font-weight: 600; }
   object-fit: cover;
 }
 
+.gallery-item input[type="checkbox"] {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  z-index: 2;
+}
+
 .gallery-item .title-overlay {
   position: absolute;
   bottom: 0;
@@ -61,6 +68,13 @@ h1 { margin-top: 1rem; font-weight: 600; }
   object-fit: cover;
   border-radius: 0.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.preview-grid input[type="checkbox"] {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  z-index: 2;
 }
 
 /* Metadata table formatting */

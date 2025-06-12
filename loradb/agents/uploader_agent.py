@@ -63,3 +63,19 @@ class UploaderAgent:
                     extracted.append(dest)
                     index += 1
         return extracted
+
+    def delete_lora(self, filename: str) -> None:
+        """Delete a LoRA file and all associated preview images."""
+        path = self.upload_dir / filename
+        if path.exists():
+            path.unlink()
+        stem = Path(filename).stem
+        for ext in [".png", ".jpg", ".jpeg", ".gif"]:
+            for p in self.upload_dir.glob(f"{stem}*{ext}"):
+                p.unlink(missing_ok=True)
+
+    def delete_preview(self, filename: str) -> None:
+        """Delete a single preview image."""
+        path = self.upload_dir / filename
+        if path.exists():
+            path.unlink()

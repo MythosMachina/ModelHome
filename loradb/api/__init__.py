@@ -69,3 +69,21 @@ async def detail(filename: str):
     meta = extractor.extract(Path(uploader.upload_dir) / filename)
     entry["metadata"] = meta
     return frontend.render_detail(entry)
+
+
+@router.post('/delete')
+async def delete_files(request: Request):
+    """Delete selected LoRA or preview files."""
+    form = await request.form()
+    files = form.getlist('files')
+    deleted = []
+    for fname in files:
+        if fname.endswith('.safetensors'):
+            uploader.delete_lora(fname)
+            indexer.remove_metadata(fname)
+        else:
+            uploader.delete_preview(fname)
+        deleted.append(fname)
+    if 'text/html' in request.headers.get('accept', ''):
+        return RedirectResponse(url='/grid', status_code=303)
+    return {'deleted': deleted}

@@ -5,16 +5,22 @@
   <input type="text" class="form-control" name="q" placeholder="Search" value="{{ query }}">
   <button class="btn btn-outline-secondary" type="submit">&#128269;</button>
 </form>
-<div class="gallery-grid">
-  {% for entry in entries %}
-  <div class="gallery-item">
-    {% if entry.preview_url %}
-    <img src="{{ entry.preview_url }}" alt="preview">
-    {% endif %}
-    <div class="title-overlay">
-      <a href="/detail/{{ entry.filename }}" class="stretched-link text-light text-decoration-none">{{ entry.name or entry.filename }}</a>
-    </div>
+<form method="post" action="/delete">
+  <div class="d-flex justify-content-end mb-2">
+    <button class="btn btn-danger btn-sm" type="submit">Remove Selected</button>
   </div>
-  {% endfor %}
-</div>
+  <div class="gallery-grid">
+    {% for entry in entries %}
+    <div class="gallery-item position-relative">
+      {% if entry.preview_url %}
+      <img src="{{ entry.preview_url }}" alt="preview">
+      {% endif %}
+      <input class="form-check-input position-absolute m-2 top-0 end-0" type="checkbox" name="files" value="{{ entry.filename }}">
+      <div class="title-overlay">
+        <a href="/detail/{{ entry.filename }}" class="stretched-link text-light text-decoration-none">{{ entry.name or entry.filename }}</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</form>
 {% endblock %}

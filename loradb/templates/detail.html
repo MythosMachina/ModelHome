@@ -1,11 +1,19 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1 class="mb-4">{{ entry.name or entry.filename }}</h1>
-<div class="preview-grid mb-3">
-  {% for img in entry.previews %}
-  <a href="{{ img }}" target="_blank"><img src="{{ img }}" class="img-fluid rounded"></a>
-  {% endfor %}
-</div>
+<form method="post" action="/delete">
+  <div class="d-flex justify-content-end mb-2">
+    <button class="btn btn-danger btn-sm" type="submit">Remove Selected</button>
+  </div>
+  <div class="preview-grid mb-3">
+    {% for img in entry.previews %}
+    <div class="position-relative">
+      <a href="{{ img }}" target="_blank"><img src="{{ img }}" class="img-fluid rounded"></a>
+      <input class="form-check-input position-absolute top-0 end-0 m-1" type="checkbox" name="files" value="{{ img|replace('/uploads/','') }}">
+    </div>
+    {% endfor %}
+  </div>
+</form>
 <div class="table-responsive">
   <table class="table table-dark table-striped metadata-table">
     <tbody>
