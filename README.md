@@ -31,28 +31,21 @@ requirements.txt       # Python dependencies
 
 ## Installation
 
-1. Clone the repository and change into the project folder:
+Run the setup script directly from GitHub:
 
-   ```bash
-   git clone https://github.com/AsaTyr2018/MyLora.git
-   cd MyLora
-   ```
+```bash
+curl -sL https://raw.githubusercontent.com/AsaTyr2018/MyLora/main/setup.sh | sudo bash -s install
+```
 
-2. Create a virtual environment (optional but recommended) and install the dependencies:
+If you cloned the repository manually run:
 
-   ```bash
-   python -m venv venv
-   source venv/bin/activate
-   pip install -r requirements.txt
-   ```
+```bash
+sudo ./setup.sh install      # install
+sudo ./setup.sh update       # update
+sudo ./setup.sh uninstall    # remove
+```
 
-3. Start the web application:
-
-   ```bash
-   python main.py
-   ```
-
-   The interface is available on [http://localhost:5000](http://localhost:5000).
+After installation the interface is available on [http://localhost:5000](http://localhost:5000).
 
 ## Usage
 
