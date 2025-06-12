@@ -1,5 +1,7 @@
 from pathlib import Path
 from typing import Iterable, List
+import tempfile
+import zipfile
 
 import shutil
 
@@ -34,3 +36,30 @@ class UploaderAgent:
                 shutil.copyfileobj(file.file, f)
             saved.append(dest)
         return saved
+
+    def save_preview_zip(self, zip_file) -> List[Path]:
+        """Save and extract a zip of preview images for a LoRA."""
+        stem = Path(zip_file.filename).stem
+        extracted: List[Path] = []
+        with tempfile.TemporaryDirectory() as td:
+            temp_path = Path(td) / zip_file.filename
+            with open(temp_path, "wb") as f:
+                shutil.copyfileobj(zip_file.file, f)
+            with zipfile.ZipFile(temp_path) as zf:
+                index = 0
+                for info in zf.infolist():
+                    if info.is_dir():
+                        continue
+                    suffix = Path(info.filename).suffix.lower()
+                    if suffix not in {".png", ".jpg", ".jpeg", ".gif"}:
+                        continue
+                    if index == 0:
+                        dest_name = f"{stem}{suffix}"
+                    else:
+                        dest_name = f"{stem}_{index}{suffix}"
+                    dest = self.upload_dir / dest_name
+                    with zf.open(info) as src, dest.open("wb") as out:
+                        shutil.copyfileobj(src, out)
+                    extracted.append(dest)
+                    index += 1
+        return extracted

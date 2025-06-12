@@ -6,7 +6,8 @@ A web-based management platform for LoRA files (.safetensors) with preview suppo
 
 ## ✨ Features
 
-* ⬆️ **Bulk Upload** of `.safetensors` LoRA files and preview images
+* ⬆️ **Bulk Upload** of `.safetensors` LoRA files
+* 📦 **Preview Upload via ZIP** for each LoRA
 * 🌐 **Dark Mode Interface** in modern grid gallery design
 * ⚙️ **Automatic Metadata Extraction** including training tags
 * ⚡ **Search by Name and Tags**, powered by indexed metadata
@@ -57,7 +58,8 @@ Default port: `http://ServerIP:5000`
 
 ### API Endpoints
 
-* `POST /upload` - upload one or more `.safetensors` or preview images
+* `POST /upload` - upload one or more `.safetensors` files
+* `POST /upload_previews` - upload a zip containing preview images
 * `GET /search?query=<term>` - search indexed metadata
 * `GET /grid` - simple gallery view of all indexed files
 

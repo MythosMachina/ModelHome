@@ -35,6 +35,20 @@ async def upload(request: Request, files: list[UploadFile] = File(...)):
         return RedirectResponse(url='/grid', status_code=303)
     return results
 
+
+@router.get('/upload_previews', response_class=HTMLResponse)
+async def upload_previews_form():
+    """Form for uploading preview zip files."""
+    return frontend.env.get_template('upload_previews.html').render(title='Upload Previews')
+
+
+@router.post('/upload_previews')
+async def upload_previews(request: Request, file: UploadFile = File(...)):
+    uploader.save_preview_zip(file)
+    if 'text/html' in request.headers.get('accept', ''):
+        return RedirectResponse(url='/grid', status_code=303)
+    return {"status": "ok"}
+
 @router.get('/search')
 async def search(query: str):
     return indexer.search(query)
