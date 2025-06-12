@@ -17,7 +17,7 @@ app.include_router(api_router)
 
 @app.get("/", response_class=HTMLResponse)
 async def index():
-    return "<h1>LoRA Database</h1><p>Upload endpoint: /upload</p>"
+    return "<h1>LoRA Database</h1><p>Upload endpoint: /upload</p><p><a href='/grid'>View Gallery</a></p>"
 
 
 if __name__ == "__main__":

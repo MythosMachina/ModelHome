@@ -55,6 +55,12 @@ $ python main.py
 
 Default port: `http://ServerIP:5000`
 
+### API Endpoints
+
+* `POST /upload` - upload one or more `.safetensors` or preview images
+* `GET /search?query=<term>` - search indexed metadata
+* `GET /grid` - simple gallery view of all indexed files
+
 ---
 
 ## 🔐 Example: LoRA Grid View

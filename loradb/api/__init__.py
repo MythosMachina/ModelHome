@@ -1,23 +1,34 @@
 from fastapi import APIRouter, UploadFile, File
+from fastapi.responses import HTMLResponse
 from pathlib import Path
 
 from ..agents.uploader_agent import UploaderAgent
 from ..agents.metadata_extractor_agent import MetadataExtractorAgent
 from ..agents.indexing_agent import IndexingAgent
+from ..agents.frontend_agent import FrontendAgent
 
 router = APIRouter()
 
 uploader = UploaderAgent()
 extractor = MetadataExtractorAgent()
 indexer = IndexingAgent()
+frontend = FrontendAgent(Path(uploader.upload_dir))
 
 @router.post('/upload')
-async def upload(file: UploadFile = File(...)):
-    path = uploader.save_file(file.filename, file.file)
-    metadata = extractor.extract(Path(path))
-    indexer.add_metadata(metadata)
-    return metadata
+async def upload(files: list[UploadFile] = File(...)):
+    saved_paths = uploader.save_files(files)
+    results = []
+    for path in saved_paths:
+        meta = extractor.extract(Path(path))
+        indexer.add_metadata(meta)
+        results.append(meta)
+    return results
 
 @router.get('/search')
 async def search(query: str):
     return indexer.search(query)
+
+@router.get('/grid', response_class=HTMLResponse)
+async def grid():
+    entries = indexer.search('*')
+    return frontend.render_grid(entries)

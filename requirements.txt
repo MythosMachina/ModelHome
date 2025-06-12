@@ -1,2 +1,5 @@
 fastapi
 uvicorn
+safetensors
+python-multipart
+Pillow
