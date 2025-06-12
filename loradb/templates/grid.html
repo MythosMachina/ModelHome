@@ -1,17 +1,14 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1 class="mb-4">LoRA Gallery</h1>
-<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+<div class="gallery-grid">
   {% for entry in entries %}
-  <div class="col">
-    <div class="card h-100 bg-secondary text-light">
-      {% if entry.preview_url %}
-      <img src="{{ entry.preview_url }}" class="card-img-top" alt="preview">
-      {% endif %}
-      <div class="card-body p-2">
-        <h5 class="card-title small">{{ entry.name or entry.filename }}</h5>
-        <a href="/detail/{{ entry.filename }}" class="stretched-link"></a>
-      </div>
+  <div class="gallery-item">
+    {% if entry.preview_url %}
+    <img src="{{ entry.preview_url }}" alt="preview">
+    {% endif %}
+    <div class="title-overlay">
+      <a href="/detail/{{ entry.filename }}" class="stretched-link text-light text-decoration-none">{{ entry.name or entry.filename }}</a>
     </div>
   </div>
   {% endfor %}
