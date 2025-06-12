@@ -1,9 +1,9 @@
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, List
 
 import shutil
 
-from .. import config
+import config
 
 class UploaderAgent:
     """Handle uploading LoRA files and preview images."""
@@ -18,3 +18,19 @@ class UploaderAgent:
         with dest.open("wb") as f:
             shutil.copyfileobj(fileobj, f)
         return dest
+
+    def save_files(self, files: Iterable) -> List[Path]:
+        """Save multiple uploaded files."""
+        saved: List[Path] = []
+        for file in files:
+            name = Path(file.filename).name
+            dest = self.upload_dir / name
+            # Ensure unique destination
+            counter = 1
+            while dest.exists():
+                dest = self.upload_dir / f"{dest.stem}_{counter}{dest.suffix}"
+                counter += 1
+            with dest.open("wb") as f:
+                shutil.copyfileobj(file.file, f)
+            saved.append(dest)
+        return saved
