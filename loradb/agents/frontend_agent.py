@@ -13,7 +13,13 @@ class FrontendAgent:
         self.env = Environment(loader=FileSystemLoader(template_dir))
 
     def _find_previews(self, stem: str) -> List[str]:
-        patterns = [f"{stem}.png", f"{stem}.jpg", f"{stem}.*.png", f"{stem}.*.jpg"]
+        # Include numbered variants like "name_1.png" as well as the base
+        patterns = [
+            f"{stem}.png",
+            f"{stem}.jpg",
+            f"{stem}_*.png",
+            f"{stem}_*.jpg",
+        ]
         matches: List[str] = []
         for pattern in patterns:
             matches.extend([str(p) for p in self.uploads_dir.glob(pattern)])
