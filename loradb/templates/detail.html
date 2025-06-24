@@ -11,8 +11,8 @@
     <span class="text-muted">None</span>
   {% endif %}
 </div>
-{% if categories %}
 <div class="d-flex align-items-start mb-3 gap-2">
+  {% if categories %}
   <form method="post" action="/assign_category" style="max-width: 300px;">
     <input type="hidden" name="filename" value="{{ entry.filename }}">
     <div class="input-group">
@@ -24,9 +24,9 @@
       <button class="btn btn-outline-primary" type="submit">Add</button>
     </div>
   </form>
+  {% endif %}
   <a class="btn btn-primary" href="/uploads/{{ entry.filename }}" download>Download</a>
 </div>
-{% endif %}
 <form method="post" action="/delete">
   <div class="d-flex justify-content-end mb-2">
     <button class="btn btn-danger btn-sm" type="submit">Remove Selected</button>
