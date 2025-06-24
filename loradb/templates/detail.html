@@ -11,26 +11,26 @@
     <span class="text-muted">None</span>
   {% endif %}
 </div>
-<div class="d-flex align-items-start mb-3 gap-2">
-  {% if categories %}
-  <form method="post" action="/assign_category" style="max-width: 300px;">
-    <input type="hidden" name="filename" value="{{ entry.filename }}">
-    <div class="input-group">
-      <select class="form-select" name="category_id">
-        {% for cat in categories %}
-        <option value="{{ cat.id }}">{{ cat.name }}</option>
-        {% endfor %}
-      </select>
-      <button class="btn btn-outline-primary" type="submit">Add</button>
-    </div>
-  </form>
-  <form method="post" action="/categories" style="max-width: 300px;">
-    <div class="input-group">
-      <input type="text" class="form-control" name="name" placeholder="New category">
-      <button class="btn btn-outline-secondary" type="submit">Create</button>
-    </div>
-  </form>
-  {% endif %}
+  <div class="d-flex align-items-start mb-3 gap-2">
+    {% if categories %}
+    <form method="post" action="/assign_category" style="max-width: 300px;">
+      <input type="hidden" name="filename" value="{{ entry.filename }}">
+      <div class="input-group">
+        <select class="form-select" name="category_id">
+          {% for cat in categories %}
+          <option value="{{ cat.id }}">{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+        <button class="btn btn-outline-primary" type="submit">Add</button>
+      </div>
+    </form>
+    {% endif %}
+    <form method="post" action="/categories" style="max-width: 300px;">
+      <div class="input-group">
+        <input type="text" class="form-control" name="name" placeholder="New category">
+        <button class="btn btn-outline-secondary" type="submit">Create</button>
+      </div>
+    </form>
   <a class="btn btn-primary" href="/uploads/{{ entry.filename }}" download>Download</a>
 </div>
 <form method="post" action="/delete">
