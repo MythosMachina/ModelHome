@@ -56,7 +56,7 @@ After installation the interface is available on [http://localhost:5000](http://
 - **Browse and search**: the `/grid` page lists all indexed LoRAs. Use the search box to filter by filename or tags.
 - **Detail view**: click a LoRA in the gallery to view all previews and metadata.  A download button is provided to retrieve the original file.
 - **Delete files**: tick the checkboxes in the gallery or detail view and press *Remove Selected* to delete the chosen files.
-- **Categories**: add categories via the API or detail page and use the dropdown on the gallery page to filter.
+- **Categories**: create new categories using the form on a LoRA's detail page (or via the API) and use the dropdown on the gallery page to filter.
 
 ### Bulk import
 
