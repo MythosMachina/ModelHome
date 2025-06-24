@@ -76,8 +76,12 @@ async def list_categories():
 
 
 @router.post('/categories')
-async def create_category(name: str = Form(...)):
+async def create_category(request: Request, name: str = Form(...)):
+    """Create a new category and optionally redirect for HTML forms."""
     cid = indexer.create_category(name)
+    if 'text/html' in request.headers.get('accept', ''):
+        referer = request.headers.get('referer', '/grid')
+        return RedirectResponse(url=referer, status_code=303)
     return {'id': cid}
 
 
