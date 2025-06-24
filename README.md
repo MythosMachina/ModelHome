@@ -61,14 +61,17 @@ After installation the interface is available on [http://localhost:5000](http://
 
 Use `bulk_import.py` to ingest an existing collection of LoRA files and preview
 images. The script expects two directories: one containing all `.safetensors`
-files and another holding subfolders with the corresponding preview images. Run
+files and another holding subfolders with the corresponding preview images. An
+optional third directory may contain category text files (one file per
+category, lines listing model filenames). Run
 
 ```bash
-python bulk_import.py /path/to/safetensors /path/to/images
+python bulk_import.py /path/to/safetensors /path/to/images /path/to/categories
 ```
 
 Every model will be copied into `loradb/uploads`, its metadata extracted and
-added to the search index so it appears in the web interface automatically.
+added to the search index. When a categories directory is supplied, the models
+are automatically assigned to the listed categories.
 
 ### Category migration
 
