@@ -1,6 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pathlib import Path
+import random
 
 import config
 
@@ -50,8 +51,23 @@ async def upload_previews(request: Request, file: UploadFile = File(...)):
     return {"status": "ok"}
 
 @router.get('/search')
-async def search(query: str):
-    return indexer.search(query)
+async def search(query: str, limit: int | None = None, offset: int = 0):
+    return indexer.search(query, limit=limit, offset=offset)
+
+@router.get('/grid_data')
+async def grid_data(q: str = '*', category: int | None = None, offset: int = 0, limit: int = 50):
+    if not q:
+        q = '*'
+    if category:
+        entries = indexer.search_by_category(category, q, limit=limit, offset=offset)
+    else:
+        entries = indexer.search(q, limit=limit, offset=offset)
+    for e in entries:
+        e['categories'] = indexer.get_categories_for(e['filename'])
+        stem = Path(e.get('filename', '')).stem
+        previews = frontend._find_previews(stem)
+        e['preview_url'] = random.choice(previews) if previews else None
+    return entries
 
 
 @router.get('/categories')
@@ -78,11 +94,13 @@ async def grid(request: Request):
     if not query:
         query = '*'
     category = request.query_params.get('category')
+    limit = int(request.query_params.get('limit', 50))
+    offset = int(request.query_params.get('offset', 0))
     categories = indexer.list_categories()
     if category:
-        entries = indexer.search_by_category(int(category), query)
+        entries = indexer.search_by_category(int(category), query, limit=limit, offset=offset)
     else:
-        entries = indexer.search(query)
+        entries = indexer.search(query, limit=limit, offset=offset)
     for e in entries:
         e['categories'] = indexer.get_categories_for(e['filename'])
     return frontend.render_grid(
@@ -90,6 +108,7 @@ async def grid(request: Request):
         query=query if query != '*' else '',
         categories=categories,
         selected_category=category or '',
+        limit=limit,
     )
 
 

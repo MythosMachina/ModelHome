@@ -21,7 +21,7 @@
   <div class="d-flex justify-content-end mb-2">
     <button class="btn btn-danger btn-sm" type="submit">Remove Selected</button>
   </div>
-  <div class="gallery-grid">
+  <div class="gallery-grid" id="gallery">
     {% for entry in entries %}
     <div class="gallery-item position-relative">
       {% if entry.preview_url %}
@@ -41,5 +41,62 @@
     </div>
     {% endfor %}
   </div>
+  <div id="load-sentinel" class="text-center py-2 text-secondary">Loading...</div>
 </form>
+<script>
+const limit = {{ limit }};
+let offset = {{ entries|length }};
+const query = "{{ query }}";
+const category = "{{ selected_category }}";
+
+async function loadMore() {
+  const params = new URLSearchParams({ q: query || '*', offset: offset, limit: limit });
+  if (category) params.append('category', category);
+  const resp = await fetch('/grid_data?' + params.toString());
+  if (!resp.ok) return;
+  const data = await resp.json();
+  const gallery = document.getElementById('gallery');
+  for (const entry of data) {
+    const item = document.createElement('div');
+    item.className = 'gallery-item position-relative';
+    if (entry.preview_url) {
+      const img = document.createElement('img');
+      img.src = entry.preview_url;
+      img.alt = 'preview';
+      item.appendChild(img);
+    }
+    const cb = document.createElement('input');
+    cb.className = 'form-check-input position-absolute m-2 top-0 end-0';
+    cb.type = 'checkbox';
+    cb.name = 'files';
+    cb.value = entry.filename;
+    item.appendChild(cb);
+    const overlay = document.createElement('div');
+    overlay.className = 'title-overlay';
+    const link = document.createElement('a');
+    link.href = '/detail/' + entry.filename;
+    link.className = 'stretched-link text-light text-decoration-none';
+    link.textContent = entry.name || entry.filename;
+    overlay.appendChild(link);
+    if (entry.categories && entry.categories.length) {
+      const info = document.createElement('div');
+      info.className = 'small text-info';
+      info.textContent = entry.categories.join(', ');
+      overlay.appendChild(info);
+    }
+    item.appendChild(overlay);
+    gallery.appendChild(item);
+  }
+  offset += data.length;
+  if (data.length < limit) observer.disconnect();
+}
+
+const sentinel = document.getElementById('load-sentinel');
+const observer = new IntersectionObserver((entries) => {
+  if (entries[0].isIntersecting) {
+    loadMore();
+  }
+});
+observer.observe(sentinel);
+</script>
 {% endblock %}

@@ -85,17 +85,28 @@ class IndexingAgent:
         )
         self.conn.commit()
 
-    def search(self, query: str) -> List[Dict[str, str]]:
+    def search(
+        self,
+        query: str,
+        limit: int | None = None,
+        offset: int = 0,
+    ) -> List[Dict[str, str]]:
         cur = self.conn.cursor()
         if query == "*":
-            rows = cur.execute(
-                "SELECT filename, name, architecture, tags, base_model FROM lora_index"
-            ).fetchall()
+            sql = "SELECT filename, name, architecture, tags, base_model FROM lora_index"
+            params = []
         else:
-            rows = cur.execute(
-                "SELECT filename, name, architecture, tags, base_model FROM lora_index WHERE lora_index MATCH ?",
-                (query,),
-            ).fetchall()
+            sql = (
+                "SELECT filename, name, architecture, tags, base_model FROM lora_index WHERE lora_index MATCH ?"
+            )
+            params = [query]
+        if limit is not None:
+            sql += " LIMIT ? OFFSET ?"
+            params.extend([limit, offset])
+        elif offset:
+            sql += " LIMIT -1 OFFSET ?"
+            params.append(offset)
+        rows = cur.execute(sql, params).fetchall()
         return [
             {
                 "filename": r[0],
@@ -161,29 +172,36 @@ class IndexingAgent:
         ).fetchall()
         return [r[0] for r in rows]
 
-    def search_by_category(self, category_id: int, query: str = "*") -> List[Dict[str, str]]:
+    def search_by_category(
+        self,
+        category_id: int,
+        query: str = "*",
+        limit: int | None = None,
+        offset: int = 0,
+    ) -> List[Dict[str, str]]:
         """Return LoRAs in ``category_id`` optionally filtered by a query."""
         cur = self.conn.cursor()
         if query == "*" or not query:
-            rows = cur.execute(
-                """
-                SELECT l.filename, l.name, l.architecture, l.tags, l.base_model
-                FROM lora_index l
-                JOIN lora_category_map m ON l.filename = m.filename
-                WHERE m.category_id = ?
-                """,
-                (category_id,),
-            ).fetchall()
+            sql = (
+                "SELECT l.filename, l.name, l.architecture, l.tags, l.base_model "
+                "FROM lora_index l JOIN lora_category_map m ON l.filename = m.filename "
+                "WHERE m.category_id = ?"
+            )
+            params = [category_id]
         else:
-            rows = cur.execute(
-                """
-                SELECT l.filename, l.name, l.architecture, l.tags, l.base_model
-                FROM lora_index l
-                JOIN lora_category_map m ON l.filename = m.filename
-                WHERE m.category_id = ? AND l MATCH ?
-                """,
-                (category_id, query),
-            ).fetchall()
+            sql = (
+                "SELECT l.filename, l.name, l.architecture, l.tags, l.base_model "
+                "FROM lora_index l JOIN lora_category_map m ON l.filename = m.filename "
+                "WHERE m.category_id = ? AND l MATCH ?"
+            )
+            params = [category_id, query]
+        if limit is not None:
+            sql += " LIMIT ? OFFSET ?"
+            params.extend([limit, offset])
+        elif offset:
+            sql += " LIMIT -1 OFFSET ?"
+            params.append(offset)
+        rows = cur.execute(sql, params).fetchall()
         return [
             {
                 "filename": r[0],
