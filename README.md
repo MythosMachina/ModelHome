@@ -55,6 +55,19 @@ After installation the interface is available on [http://localhost:5000](http://
 - **Detail view**: click a LoRA in the gallery to view all previews and metadata.  A download button is provided to retrieve the original file.
 - **Delete files**: tick the checkboxes in the gallery or detail view and press *Remove Selected* to delete the chosen files.
 
+### Bulk import
+
+Use `bulk_import.py` to ingest an existing collection of LoRA files and preview
+images. The script expects two directories: one containing all `.safetensors`
+files and another holding subfolders with the corresponding preview images. Run
+
+```bash
+python bulk_import.py /path/to/safetensors /path/to/images
+```
+
+Every model will be copied into `loradb/uploads`, its metadata extracted and
+added to the search index so it appears in the web interface automatically.
+
 The web pages use Bootstrap via a CDN and are rendered with Jinja2 templates.  The application keeps all data locally on disk in the `loradb` directory.
 
 ---
