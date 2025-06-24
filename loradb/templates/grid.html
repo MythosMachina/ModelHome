@@ -48,12 +48,18 @@ const limit = {{ limit }};
 let offset = {{ entries|length }};
 const query = "{{ query }}";
 const category = "{{ selected_category }}";
+let loading = false;
 
 async function loadMore() {
+  if (loading) return;
+  loading = true;
   const params = new URLSearchParams({ q: query || '*', offset: offset, limit: limit });
   if (category) params.append('category', category);
   const resp = await fetch('/grid_data?' + params.toString());
-  if (!resp.ok) return;
+  if (!resp.ok) {
+    loading = false;
+    return;
+  }
   const data = await resp.json();
   const gallery = document.getElementById('gallery');
   for (const entry of data) {
@@ -88,7 +94,11 @@ async function loadMore() {
     gallery.appendChild(item);
   }
   offset += data.length;
-  if (data.length < limit) observer.disconnect();
+  loading = false;
+  if (data.length < limit) {
+    observer.disconnect();
+    sentinel.textContent = 'No more results';
+  }
 }
 
 const sentinel = document.getElementById('load-sentinel');
