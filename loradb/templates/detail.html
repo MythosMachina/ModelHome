@@ -12,17 +12,20 @@
   {% endif %}
 </div>
 {% if categories %}
-<form method="post" action="/assign_category" class="mb-3" style="max-width: 300px;">
-  <input type="hidden" name="filename" value="{{ entry.filename }}">
-  <div class="input-group">
-    <select class="form-select" name="category_id">
-      {% for cat in categories %}
-      <option value="{{ cat.id }}">{{ cat.name }}</option>
-      {% endfor %}
-    </select>
-    <button class="btn btn-outline-primary" type="submit">Add</button>
-  </div>
-</form>
+<div class="d-flex align-items-start mb-3 gap-2">
+  <form method="post" action="/assign_category" style="max-width: 300px;">
+    <input type="hidden" name="filename" value="{{ entry.filename }}">
+    <div class="input-group">
+      <select class="form-select" name="category_id">
+        {% for cat in categories %}
+        <option value="{{ cat.id }}">{{ cat.name }}</option>
+        {% endfor %}
+      </select>
+      <button class="btn btn-outline-primary" type="submit">Add</button>
+    </div>
+  </form>
+  <a class="btn btn-primary" href="/uploads/{{ entry.filename }}" download>Download</a>
+</div>
 {% endif %}
 <form method="post" action="/delete">
   <div class="d-flex justify-content-end mb-2">
@@ -46,5 +49,4 @@
     </tbody>
   </table>
 </div>
-<a class="btn btn-primary" href="/uploads/{{ entry.filename }}" download>Download</a>
 {% endblock %}
