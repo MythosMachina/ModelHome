@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, Request
+from fastapi import APIRouter, UploadFile, File, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pathlib import Path
 
@@ -53,13 +53,44 @@ async def upload_previews(request: Request, file: UploadFile = File(...)):
 async def search(query: str):
     return indexer.search(query)
 
+
+@router.get('/categories')
+async def list_categories():
+    return indexer.list_categories()
+
+
+@router.post('/categories')
+async def create_category(name: str = Form(...)):
+    cid = indexer.create_category(name)
+    return {'id': cid}
+
+
+@router.post('/assign_category')
+async def assign_category(request: Request, filename: str = Form(...), category_id: int = Form(...)):
+    indexer.assign_category(filename, category_id)
+    if 'text/html' in request.headers.get('accept', ''):
+        return RedirectResponse(url=f'/detail/{filename}', status_code=303)
+    return {'status': 'ok'}
+
 @router.get('/grid', response_class=HTMLResponse)
 async def grid(request: Request):
     query = request.query_params.get('q', '*')
     if not query:
         query = '*'
-    entries = indexer.search(query)
-    return frontend.render_grid(entries, query=query if query != '*' else '')
+    category = request.query_params.get('category')
+    categories = indexer.list_categories()
+    if category:
+        entries = indexer.search_by_category(int(category), query)
+    else:
+        entries = indexer.search(query)
+    for e in entries:
+        e['categories'] = indexer.get_categories_for(e['filename'])
+    return frontend.render_grid(
+        entries,
+        query=query if query != '*' else '',
+        categories=categories,
+        selected_category=category or '',
+    )
 
 
 @router.get('/detail/{filename}', response_class=HTMLResponse)
@@ -68,7 +99,9 @@ async def detail(filename: str):
     entry = results[0] if results else {"filename": filename}
     meta = extractor.extract(Path(uploader.upload_dir) / filename)
     entry["metadata"] = meta
-    return frontend.render_detail(entry)
+    entry["categories"] = indexer.get_categories_for(filename)
+    categories = indexer.list_categories()
+    return frontend.render_detail(entry, categories=categories)
 
 
 @router.post('/delete')

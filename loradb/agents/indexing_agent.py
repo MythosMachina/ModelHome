@@ -42,6 +42,23 @@ class IndexingAgent:
             )
             """
         )
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS categories (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT UNIQUE
+            )
+            """
+        )
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS lora_category_map (
+                filename TEXT,
+                category_id INTEGER,
+                UNIQUE(filename, category_id)
+            )
+            """
+        )
         self.conn.commit()
         return recreated
 
@@ -107,3 +124,73 @@ class IndexingAgent:
             (filename,),
         )
         self.conn.commit()
+
+    # --- Category management helpers ------------------------------------
+
+    def create_category(self, name: str) -> int:
+        """Create a category if it does not exist and return its id."""
+        cur = self.conn.cursor()
+        cur.execute("INSERT OR IGNORE INTO categories(name) VALUES (?)", (name,))
+        self.conn.commit()
+        cur.execute("SELECT id FROM categories WHERE name = ?", (name,))
+        row = cur.fetchone()
+        return int(row[0]) if row else 0
+
+    def list_categories(self) -> List[Dict[str, str]]:
+        cur = self.conn.cursor()
+        rows = cur.execute("SELECT id, name FROM categories ORDER BY name").fetchall()
+        return [{"id": r[0], "name": r[1]} for r in rows]
+
+    def assign_category(self, filename: str, category_id: int) -> None:
+        self.conn.execute(
+            "INSERT OR IGNORE INTO lora_category_map(filename, category_id) VALUES (?, ?)",
+            (filename, category_id),
+        )
+        self.conn.commit()
+
+    def get_categories_for(self, filename: str) -> List[str]:
+        cur = self.conn.cursor()
+        rows = cur.execute(
+            """
+            SELECT c.name FROM categories c
+            JOIN lora_category_map m ON c.id = m.category_id
+            WHERE m.filename = ?
+            ORDER BY c.name
+            """,
+            (filename,),
+        ).fetchall()
+        return [r[0] for r in rows]
+
+    def search_by_category(self, category_id: int, query: str = "*") -> List[Dict[str, str]]:
+        """Return LoRAs in ``category_id`` optionally filtered by a query."""
+        cur = self.conn.cursor()
+        if query == "*" or not query:
+            rows = cur.execute(
+                """
+                SELECT l.filename, l.name, l.architecture, l.tags, l.base_model
+                FROM lora_index l
+                JOIN lora_category_map m ON l.filename = m.filename
+                WHERE m.category_id = ?
+                """,
+                (category_id,),
+            ).fetchall()
+        else:
+            rows = cur.execute(
+                """
+                SELECT l.filename, l.name, l.architecture, l.tags, l.base_model
+                FROM lora_index l
+                JOIN lora_category_map m ON l.filename = m.filename
+                WHERE m.category_id = ? AND l MATCH ?
+                """,
+                (category_id, query),
+            ).fetchall()
+        return [
+            {
+                "filename": r[0],
+                "name": r[1],
+                "architecture": r[2],
+                "tags": r[3],
+                "base_model": r[4],
+            }
+            for r in rows
+        ]

@@ -1,9 +1,21 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1 class="mb-4">LoRA Gallery</h1>
-<form method="get" action="/grid" class="input-group mb-3" style="max-width: 400px;">
-  <input type="text" class="form-control" name="q" placeholder="Search" value="{{ query }}">
-  <button class="btn btn-outline-secondary" type="submit">&#128269;</button>
+<form method="get" action="/grid" class="row g-2 mb-3" style="max-width: 600px;">
+  <div class="col">
+    <input type="text" class="form-control" name="q" placeholder="Search" value="{{ query }}">
+  </div>
+  <div class="col">
+    <select class="form-select" name="category">
+      <option value="">All categories</option>
+      {% for cat in categories %}
+      <option value="{{ cat.id }}" {% if selected_category==cat.id|string %}selected{% endif %}>{{ cat.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-outline-secondary" type="submit">&#128269;</button>
+  </div>
 </form>
 <form method="post" action="/delete">
   <div class="d-flex justify-content-end mb-2">
@@ -18,6 +30,13 @@
       <input class="form-check-input position-absolute m-2 top-0 end-0" type="checkbox" name="files" value="{{ entry.filename }}">
       <div class="title-overlay">
         <a href="/detail/{{ entry.filename }}" class="stretched-link text-light text-decoration-none">{{ entry.name or entry.filename }}</a>
+        {% if entry.categories %}
+        <div class="small text-info">
+          {% for cat in entry.categories %}
+            {{ cat }}{% if not loop.last %}, {% endif %}
+          {% endfor %}
+        </div>
+        {% endif %}
       </div>
     </div>
     {% endfor %}
