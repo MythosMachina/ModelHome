@@ -32,6 +32,7 @@ class FrontendAgent:
         query: str | None = None,
         categories: List[Dict[str, str]] | None = None,
         selected_category: str | None = None,
+        limit: int = 50,
     ) -> str:
         for e in entries:
             stem = Path(e.get("filename", "")).stem
@@ -44,6 +45,7 @@ class FrontendAgent:
             query=query or "",
             categories=categories or [],
             selected_category=selected_category or "",
+            limit=limit,
         )
 
     def render_detail(
