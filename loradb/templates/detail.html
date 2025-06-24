@@ -1,6 +1,29 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1 class="mb-4">{{ entry.name or entry.filename }}</h1>
+<div class="mb-3">
+  Categories:
+  {% if entry.categories %}
+    {% for cat in entry.categories %}
+    <span class="badge bg-secondary">{{ cat }}</span>
+    {% endfor %}
+  {% else %}
+    <span class="text-muted">None</span>
+  {% endif %}
+</div>
+{% if categories %}
+<form method="post" action="/assign_category" class="mb-3" style="max-width: 300px;">
+  <input type="hidden" name="filename" value="{{ entry.filename }}">
+  <div class="input-group">
+    <select class="form-select" name="category_id">
+      {% for cat in categories %}
+      <option value="{{ cat.id }}">{{ cat.name }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn-outline-primary" type="submit">Add</button>
+  </div>
+</form>
+{% endif %}
 <form method="post" action="/delete">
   <div class="d-flex justify-content-end mb-2">
     <button class="btn btn-danger btn-sm" type="submit">Remove Selected</button>

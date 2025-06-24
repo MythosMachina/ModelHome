@@ -13,6 +13,7 @@ This project provides a minimal FastAPI application for organising LoRA files (`
 - **Searchable gallery** – browse all indexed LoRAs in a grid view and filter by query.
 - **Detail view** – see all previews, metadata and a download link for a single LoRA.
 - **File removal** – delete LoRA files or individual preview images from the interface.
+- **Category management** – organise LoRAs into categories and filter the gallery accordingly.
 
 ## Project layout
 
@@ -54,6 +55,7 @@ After installation the interface is available on [http://localhost:5000](http://
 - **Browse and search**: the `/grid` page lists all indexed LoRAs. Use the search box to filter by filename or tags.
 - **Detail view**: click a LoRA in the gallery to view all previews and metadata.  A download button is provided to retrieve the original file.
 - **Delete files**: tick the checkboxes in the gallery or detail view and press *Remove Selected* to delete the chosen files.
+- **Categories**: add categories via the API or detail page and use the dropdown on the gallery page to filter.
 
 ### Bulk import
 
@@ -67,6 +69,18 @@ python bulk_import.py /path/to/safetensors /path/to/images
 
 Every model will be copied into `loradb/uploads`, its metadata extracted and
 added to the search index so it appears in the web interface automatically.
+
+### Category migration
+
+Existing installations can populate the new category tables based on text files
+located next to each LoRA file. Run
+
+```bash
+python migrate_categories.py
+```
+
+Each `<name>.txt` file should contain a comma or newline separated list of
+categories which will be created and assigned to `<name>.safetensors`.
 
 The web pages use Bootstrap via a CDN and are rendered with Jinja2 templates.  The application keeps all data locally on disk in the `loradb` directory.
 

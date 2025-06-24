@@ -26,18 +26,32 @@ class FrontendAgent:
         # convert to URLs
         return [f"/uploads/{Path(m).name}" for m in matches]
 
-    def render_grid(self, entries: List[Dict[str, str]], query: str | None = None) -> str:
+    def render_grid(
+        self,
+        entries: List[Dict[str, str]],
+        query: str | None = None,
+        categories: List[Dict[str, str]] | None = None,
+        selected_category: str | None = None,
+    ) -> str:
         for e in entries:
             stem = Path(e.get("filename", "")).stem
             previews = self._find_previews(stem)
             e["preview_url"] = random.choice(previews) if previews else None
         template = self.env.get_template("grid.html")
-        return template.render(title="LoRA Gallery", entries=entries, query=query or "")
+        return template.render(
+            title="LoRA Gallery",
+            entries=entries,
+            query=query or "",
+            categories=categories or [],
+            selected_category=selected_category or "",
+        )
 
-    def render_detail(self, entry: Dict[str, str]) -> str:
+    def render_detail(
+        self, entry: Dict[str, str], categories: List[Dict[str, str]] | None = None
+    ) -> str:
         stem = Path(entry.get("filename", "")).stem
         previews = self._find_previews(stem)
         entry["previews"] = previews
         entry.setdefault("metadata", {})
         template = self.env.get_template("detail.html")
-        return template.render(title=entry.get("name"), entry=entry)
+        return template.render(title=entry.get("name"), entry=entry, categories=categories or [])
