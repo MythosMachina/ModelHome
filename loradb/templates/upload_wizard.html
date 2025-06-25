@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="mb-4">Upload Wizard</h1>
+<div id="step1">
+  <h3 class="mb-3">1. Upload safetensors</h3>
+  <div id="drop-safetensors" class="drop-area mb-2">Drag & Drop .safetensors here or click</div>
+  <input id="safetensors-input" type="file" accept=".safetensors" class="d-none">
+  <button id="upload-safetensors" class="btn btn-primary">Upload</button>
+</div>
+<div id="step2" style="display:none;">
+  <h3 class="mb-3">2. Upload previews</h3>
+  <div id="drop-previews" class="drop-area mb-2">Drag & Drop images or ZIP here or click</div>
+  <input id="previews-input" type="file" multiple accept=".png,.jpg,.jpeg,.gif,.zip" class="d-none">
+  <button id="upload-previews" class="btn btn-primary">Upload Previews</button>
+</div>
+<script>
+function setupArea(areaId, inputId) {
+  const area = document.getElementById(areaId);
+  const input = document.getElementById(inputId);
+  area.addEventListener('click', () => input.click());
+  area.addEventListener('dragover', e => { e.preventDefault(); area.classList.add('dragover'); });
+  area.addEventListener('dragleave', () => area.classList.remove('dragover'));
+  area.addEventListener('drop', e => { e.preventDefault(); area.classList.remove('dragover'); input.files = e.dataTransfer.files; });
+}
+setupArea('drop-safetensors', 'safetensors-input');
+setupArea('drop-previews', 'previews-input');
+const uploadBtn1 = document.getElementById('upload-safetensors');
+const uploadBtn2 = document.getElementById('upload-previews');
+const step1 = document.getElementById('step1');
+const step2 = document.getElementById('step2');
+let loraStem = '';
+uploadBtn1.addEventListener('click', async () => {
+  const file = document.getElementById('safetensors-input').files[0];
+  if (!file) return;
+  const fd = new FormData();
+  fd.append('files', file);
+  const resp = await fetch('/upload', { method: 'POST', body: fd });
+  if (resp.ok) {
+    loraStem = file.name.replace(/\.safetensors$/i, '');
+    step1.style.display = 'none';
+    step2.style.display = 'block';
+  }
+});
+uploadBtn2.addEventListener('click', async () => {
+  const files = document.getElementById('previews-input').files;
+  if (!files.length) return;
+  const fd = new FormData();
+  for (const f of files) fd.append('files', f);
+  fd.append('lora', loraStem);
+  const resp = await fetch('/upload_previews', { method: 'POST', body: fd });
+  if (resp.ok) {
+    window.location.href = '/detail/' + loraStem + '.safetensors';
+  }
+});
+</script>
+{% endblock %}
