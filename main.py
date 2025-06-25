@@ -5,7 +5,7 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 
 import config
-from loradb.api import router as api_router
+from loradb.api import router as api_router, indexer
 
 app = FastAPI(title="LoRA Database")
 
@@ -21,7 +21,13 @@ app.include_router(api_router)
 @app.get("/", response_class=HTMLResponse)
 async def index():
     template = env.get_template("index.html")
-    return template.render(title="LoRA Database")
+    stats = {
+        "lora_count": indexer.lora_count(),
+        "preview_count": indexer.preview_count(),
+        "category_count": indexer.category_count(),
+        "top_categories": indexer.top_categories(limit=20),
+    }
+    return template.render(title="LoRA Database", stats=stats)
 
 
 if __name__ == "__main__":

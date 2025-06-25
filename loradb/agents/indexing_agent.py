@@ -88,6 +88,70 @@ class IndexingAgent:
         )
         return cur.fetchone() is not None
 
+    # --- Statistics helpers ----------------------------------------------
+
+    def lora_count(self) -> int:
+        """Return the total number of indexed LoRA files."""
+        cur = self.conn.cursor()
+        cur.execute("SELECT COUNT(*) FROM lora_index")
+        return int(cur.fetchone()[0])
+
+    def category_count(self) -> int:
+        """Return the number of categories, including the dynamic one."""
+        cur = self.conn.cursor()
+        cur.execute("SELECT COUNT(*) FROM categories")
+        count = int(cur.fetchone()[0])
+        if self._uncategorized_exists():
+            count += 1
+        return count
+
+    def preview_count(self) -> int:
+        """Return the number of preview images stored in the uploads folder."""
+        uploads = Path(config.UPLOAD_DIR)
+        if not uploads.exists():
+            return 0
+        exts = ["*.png", "*.jpg", "*.jpeg", "*.gif"]
+        return sum(len(list(uploads.glob(p))) for p in exts)
+
+    def top_categories(self, limit: int = 10) -> List[Dict[str, str]]:
+        """Return ``limit`` categories with the most assigned LoRAs."""
+        cur = self.conn.cursor()
+        rows = cur.execute(
+            """
+            SELECT c.id, c.name, COUNT(m.filename) AS cnt
+            FROM categories c
+            LEFT JOIN lora_category_map m ON c.id = m.category_id
+            GROUP BY c.id
+            ORDER BY cnt DESC, c.name
+            LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
+        categories = [
+            {"id": r[0], "name": r[1], "count": int(r[2])}
+            for r in rows
+        ]
+        # Insert uncategorised entry if required
+        cur.execute(
+            """
+            SELECT COUNT(*) FROM lora_index l
+            LEFT JOIN lora_category_map m ON l.filename = m.filename
+            WHERE m.filename IS NULL
+            """
+        )
+        uncategorised = int(cur.fetchone()[0])
+        if uncategorised:
+            categories.append(
+                {
+                    "id": self.NO_CATEGORY_ID,
+                    "name": self.NO_CATEGORY_NAME,
+                    "count": uncategorised,
+                }
+            )
+        # Sort again to ensure uncategorised slot is in correct position
+        categories.sort(key=lambda c: c["count"], reverse=True)
+        return categories[:limit]
+
     def add_metadata(self, data: Dict[str, str]) -> None:
         self.conn.execute(
             """
