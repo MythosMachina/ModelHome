@@ -60,11 +60,7 @@ After starting the service open [http://localhost:5000](http://localhost:5000) i
 
 ### Upload models
 
-Visit `/upload` and select one or more `.safetensors` files. Uploaded models are stored in `loradb/uploads` and indexed automatically.
-
-### Upload previews
-
-Open `/upload_previews` to send a ZIP archive of preview images. Files named `mylora.png`, `mylora_1.png`, ... will be placed next to `mylora.safetensors`.
+The `/upload_wizard` page lets you upload a LoRA file and its previews in one go. The wizard shows the upload progress for both steps and automatically redirects to the detail page once finished.
 
 ### Browse and search
 
