@@ -9,7 +9,6 @@ Grid View
 Detail View
 ![grafik](https://github.com/user-attachments/assets/233b63ac-ca2b-4249-aaa2-f2b991aa25c9)
 
-
 ## Features
 
 - **Upload LoRA files** – multiple `.safetensors` files can be uploaded at once.
@@ -55,42 +54,52 @@ After installation the interface is available on [http://localhost:5000](http://
 
 ## Usage
 
-- **Upload models**: open `/upload` and select one or more `.safetensors` files.  Each file is stored in `loradb/uploads` and indexed automatically.
-- **Upload previews**: open `/upload_previews` to upload a ZIP containing images.  Files named `mylora.png`, `mylora_1.png`, ... will be placed next to `mylora.safetensors` and shown in the gallery.
-- **Browse and search**: the `/grid` page lists all indexed LoRAs. Use the search box to filter by filename or tags.
-- **Detail view**: click a LoRA in the gallery to view all previews and metadata.  A download button is provided to retrieve the original file.
-- **Delete files**: tick the checkboxes in the gallery or detail view and press *Remove Selected* to delete the chosen files.
-- **Categories**: create new categories using the form on a LoRA's detail page (or via the API) and use the dropdown on the gallery page to filter.
+After starting the service open [http://localhost:5000](http://localhost:5000) in your browser.
+
+### Upload models
+
+Visit `/upload` and select one or more `.safetensors` files. Uploaded models are stored in `loradb/uploads` and indexed automatically.
+
+### Upload previews
+
+Open `/upload_previews` to send a ZIP archive of preview images. Files named `mylora.png`, `mylora_1.png`, ... will be placed next to `mylora.safetensors`.
+
+### Browse and search
+
+The `/grid` page shows all models. Use the search box or category dropdown to filter. Clicking an entry opens a detail page with metadata, previews and a download link.
+
+### Delete files
+
+Select items in the gallery or detail view and press **Remove Selected** to delete them.
+
+### Categories
+
+Create categories from a model's detail page or via the API and assign models to them. The dropdown on `/grid` filters by category.
 
 ### Bulk import
 
-Use `bulk_import.py` to ingest an existing collection of LoRA files and preview
-images. The script expects two directories: one containing all `.safetensors`
-files and another holding subfolders with the corresponding preview images. An
-optional third directory may contain category text files (one file per
-category, lines listing model filenames). Run
+`bulk_import.py` can ingest an existing collection without using the web interface.
+Run it as
 
 ```bash
-python bulk_import.py /path/to/safetensors /path/to/images /path/to/categories
+python bulk_import.py SAFETENSORS_DIR IMAGES_DIR [CATEGORIES_DIR]
 ```
 
-Every model will be copied into `loradb/uploads`, its metadata extracted and
-added to the search index. When a categories directory is supplied, the models
-are automatically assigned to the listed categories.
+* **SAFETENSORS_DIR** – directory containing the `.safetensors` files
+* **IMAGES_DIR** – directory with subfolders of preview images
+* **CATEGORIES_DIR** – optional directory of text files, one per category, listing model filenames
+
+The script copies each model into `loradb/uploads`, extracts its metadata and updates the search index. When a categories directory is provided the models are automatically assigned.
 
 ### Category migration
 
-Existing installations can populate the new category tables based on text files
-located next to each LoRA file. Run
+If your existing installation stores categories in `<name>.txt` files inside `loradb/uploads`, run
 
 ```bash
 python migrate_categories.py
 ```
 
-Each `<name>.txt` file should contain a comma or newline separated list of
-categories which will be created and assigned to `<name>.safetensors`.
-
-The web pages use Bootstrap via a CDN and are rendered with Jinja2 templates.  The application keeps all data locally on disk in the `loradb` directory.
+Each text file may list categories separated by commas or newlines. The script creates the missing categories and assigns them to `<name>.safetensors`.
 
 ---
 
