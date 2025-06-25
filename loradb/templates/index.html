@@ -14,7 +14,7 @@
   </ul>
   <div class="category-cloud mt-3">
     {% for cat in stats.top_categories %}
-    <a href="/grid?q=&category={{ cat.id }}" class="me-2" style="font-size: {{ 0.8 + cat.count * 0.1 }}rem;">
+    <a href="/grid?q=&category={{ cat.id }}" style="font-size: {{ cat.size }}rem;" class="me-2">
       {{ cat.name }}
     </a>
     {% endfor %}
