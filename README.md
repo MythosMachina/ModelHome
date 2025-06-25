@@ -19,6 +19,7 @@ Detail View
 - **File removal** – delete LoRA files or individual preview images from the interface.
 - **Category management** – organise LoRAs into categories and filter the gallery accordingly.
 - **Remove categories** – unassign a model from a category directly from the detail page.
+- **Find uncategorised models** – a dynamic *No Category* filter lists LoRAs without any category.
 
 ## Project layout
 

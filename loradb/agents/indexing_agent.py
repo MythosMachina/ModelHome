@@ -9,6 +9,12 @@ from .metadata_extractor_agent import MetadataExtractorAgent
 class IndexingAgent:
     """Maintain search index for LoRA metadata using SQLite FTS5."""
 
+    #: ID used for the dynamic "no category" entry returned by
+    #: :py:meth:`list_categories`.
+    NO_CATEGORY_ID = 0
+    #: Display name for the dynamic "no category" entry.
+    NO_CATEGORY_NAME = "No Category"
+
     def __init__(self, db_path: Path | None = None) -> None:
         self.db_path = Path(db_path or "loradb/search_index/index.db")
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
@@ -68,6 +74,19 @@ class IndexingAgent:
         cur.execute("SELECT COUNT(*) FROM lora_index")
         count = cur.fetchone()[0]
         return count == 0
+
+    def _uncategorized_exists(self) -> bool:
+        """Return ``True`` if any LoRA has no category assigned."""
+        cur = self.conn.cursor()
+        cur.execute(
+            """
+            SELECT 1 FROM lora_index l
+            LEFT JOIN lora_category_map m ON l.filename = m.filename
+            WHERE m.filename IS NULL
+            LIMIT 1
+            """
+        )
+        return cur.fetchone() is not None
 
     def add_metadata(self, data: Dict[str, str]) -> None:
         self.conn.execute(
@@ -150,7 +169,10 @@ class IndexingAgent:
     def list_categories(self) -> List[Dict[str, str]]:
         cur = self.conn.cursor()
         rows = cur.execute("SELECT id, name FROM categories ORDER BY name").fetchall()
-        return [{"id": r[0], "name": r[1]} for r in rows]
+        categories = [{"id": r[0], "name": r[1]} for r in rows]
+        if self._uncategorized_exists():
+            categories.insert(0, {"id": self.NO_CATEGORY_ID, "name": self.NO_CATEGORY_NAME})
+        return categories
 
     def assign_category(self, filename: str, category_id: int) -> None:
         self.conn.execute(
@@ -178,7 +200,10 @@ class IndexingAgent:
             """,
             (filename,),
         ).fetchall()
-        return [r[0] for r in rows]
+        names = [r[0] for r in rows]
+        if not names:
+            names.append(self.NO_CATEGORY_NAME)
+        return names
 
     def get_categories_with_ids(self, filename: str) -> List[Dict[str, str]]:
         """Return categories for ``filename`` including the category IDs."""
@@ -192,7 +217,9 @@ class IndexingAgent:
             """,
             (filename,),
         ).fetchall()
-        return [{"id": r[0], "name": r[1]} for r in rows]
+        if rows:
+            return [{"id": r[0], "name": r[1]} for r in rows]
+        return [{"id": self.NO_CATEGORY_ID, "name": self.NO_CATEGORY_NAME}]
 
     def search_by_category(
         self,
@@ -203,20 +230,36 @@ class IndexingAgent:
     ) -> List[Dict[str, str]]:
         """Return LoRAs in ``category_id`` optionally filtered by a query."""
         cur = self.conn.cursor()
-        if query == "*" or not query:
-            sql = (
-                "SELECT l.filename, l.name, l.architecture, l.tags, l.base_model "
-                "FROM lora_index l JOIN lora_category_map m ON l.filename = m.filename "
-                "WHERE m.category_id = ?"
-            )
-            params = [category_id]
+        if category_id == self.NO_CATEGORY_ID:
+            if query == "*" or not query:
+                sql = (
+                    "SELECT l.filename, l.name, l.architecture, l.tags, l.base_model "
+                    "FROM lora_index l LEFT JOIN lora_category_map m ON l.filename = m.filename "
+                    "WHERE m.filename IS NULL"
+                )
+                params: List = []
+            else:
+                sql = (
+                    "SELECT l.filename, l.name, l.architecture, l.tags, l.base_model "
+                    "FROM lora_index l LEFT JOIN lora_category_map m ON l.filename = m.filename "
+                    "WHERE m.filename IS NULL AND l MATCH ?"
+                )
+                params = [query]
         else:
-            sql = (
-                "SELECT l.filename, l.name, l.architecture, l.tags, l.base_model "
-                "FROM lora_index l JOIN lora_category_map m ON l.filename = m.filename "
-                "WHERE m.category_id = ? AND l MATCH ?"
-            )
-            params = [category_id, query]
+            if query == "*" or not query:
+                sql = (
+                    "SELECT l.filename, l.name, l.architecture, l.tags, l.base_model "
+                    "FROM lora_index l JOIN lora_category_map m ON l.filename = m.filename "
+                    "WHERE m.category_id = ?"
+                )
+                params = [category_id]
+            else:
+                sql = (
+                    "SELECT l.filename, l.name, l.architecture, l.tags, l.base_model "
+                    "FROM lora_index l JOIN lora_category_map m ON l.filename = m.filename "
+                    "WHERE m.category_id = ? AND l MATCH ?"
+                )
+                params = [category_id, query]
         if limit is not None:
             sql += " LIMIT ? OFFSET ?"
             params.extend([limit, offset])
