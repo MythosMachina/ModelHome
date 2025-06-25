@@ -16,6 +16,7 @@ uploader = UploaderAgent()
 extractor = MetadataExtractorAgent()
 indexer = IndexingAgent()
 frontend = FrontendAgent(Path(uploader.upload_dir), Path(config.TEMPLATE_DIR))
+uploader.frontend = frontend
 
 
 @router.get('/upload', response_class=HTMLResponse)
@@ -46,6 +47,7 @@ async def upload_previews_form():
 @router.post('/upload_previews')
 async def upload_previews(request: Request, file: UploadFile = File(...)):
     uploader.save_preview_zip(file)
+    frontend.refresh_preview_cache(Path(file.filename).stem)
     if 'text/html' in request.headers.get('accept', ''):
         return RedirectResponse(url='/grid', status_code=303)
     return {"status": "ok"}
@@ -148,6 +150,7 @@ async def delete_files(request: Request):
             indexer.remove_metadata(fname)
         else:
             uploader.delete_preview(fname)
+        frontend.invalidate_preview_cache(Path(fname).stem)
         deleted.append(fname)
     if 'text/html' in request.headers.get('accept', ''):
         return RedirectResponse(url='/grid', status_code=303)

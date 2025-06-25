@@ -11,8 +11,13 @@ class FrontendAgent:
     def __init__(self, uploads_dir: Path, template_dir: Path) -> None:
         self.uploads_dir = uploads_dir
         self.env = Environment(loader=FileSystemLoader(template_dir))
+        # Cache mapping a file stem to the list of preview URLs
+        self.preview_cache: Dict[str, List[str]] = {}
 
     def _find_previews(self, stem: str) -> List[str]:
+        """Return preview URLs for ``stem`` using a simple cache."""
+        if stem in self.preview_cache:
+            return self.preview_cache[stem]
         # Include numbered variants like "name_1.png" as well as the base
         patterns = [
             f"{stem}.png",
@@ -23,8 +28,21 @@ class FrontendAgent:
         matches: List[str] = []
         for pattern in patterns:
             matches.extend([str(p) for p in self.uploads_dir.glob(pattern)])
-        # convert to URLs
-        return [f"/uploads/{Path(m).name}" for m in matches]
+        urls = [f"/uploads/{Path(m).name}" for m in matches]
+        self.preview_cache[stem] = urls
+        return urls
+
+    def invalidate_preview_cache(self, stem: str | None = None) -> None:
+        """Remove ``stem`` from the preview cache or clear it entirely."""
+        if stem is None:
+            self.preview_cache.clear()
+        else:
+            self.preview_cache.pop(stem, None)
+
+    def refresh_preview_cache(self, stem: str) -> List[str]:
+        """Force re-scan of previews for ``stem`` and return the result."""
+        self.invalidate_preview_cache(stem)
+        return self._find_previews(stem)
 
     def render_grid(
         self,
