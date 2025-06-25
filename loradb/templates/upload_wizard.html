@@ -15,7 +15,7 @@
   <h3 class="mb-3">2. Upload previews</h3>
   <div id="drop-previews" class="drop-area mb-2">Drag & Drop images or ZIP here or click</div>
   <div id="previews-info" class="text-secondary small mb-2"></div>
-  <input id="previews-input" type="file" multiple accept=".png,.jpg,.jpeg,.gif,.zip" class="d-none">
+  <input id="previews-input" type="file" multiple accept=".png,.jpg,.jpeg,.gif,.zip" webkitdirectory directory class="d-none">
   <button id="upload-previews" class="btn btn-primary">Upload Previews</button>
   <div id="previews-progress" class="progress mt-3 d-none">
     <div class="progress-bar" role="progressbar" style="width:0%">0%</div>
@@ -34,17 +34,54 @@ function updateInfo(inputId, files) {
   }
 }
 
+async function gatherFiles(dtItems) {
+  const files = [];
+  for (const item of dtItems) {
+    if (item.kind !== 'file') continue;
+    const entry = item.webkitGetAsEntry && item.webkitGetAsEntry();
+    if (entry && entry.isDirectory) {
+      files.push(...await traverseDir(entry));
+    } else {
+      const f = item.getAsFile();
+      if (f) files.push(f);
+    }
+  }
+  return files;
+}
+
+function traverseDir(entry) {
+  return new Promise(resolve => {
+    const reader = entry.createReader();
+    const all = [];
+    const read = () => {
+      reader.readEntries(async entries => {
+        if (!entries.length) { resolve(all); return; }
+        let pending = entries.length;
+        for (const e of entries) {
+          if (e.isFile) {
+            e.file(f => { all.push(f); if (!--pending) read(); });
+          } else {
+            traverseDir(e).then(f => { all.push(...f); if (!--pending) read(); });
+          }
+        }
+      });
+    };
+    read();
+  });
+}
+
 function setupArea(areaId, inputId) {
   const area = document.getElementById(areaId);
   const input = document.getElementById(inputId);
   area.addEventListener('click', () => input.click());
   area.addEventListener('dragover', e => { e.preventDefault(); area.classList.add('dragover'); });
   area.addEventListener('dragleave', () => area.classList.remove('dragover'));
-  area.addEventListener('drop', e => {
+  area.addEventListener('drop', async e => {
     e.preventDefault();
     area.classList.remove('dragover');
+    const dropped = await gatherFiles(e.dataTransfer.items);
     const dt = new DataTransfer();
-    for (const f of e.dataTransfer.files) dt.items.add(f);
+    for (const f of dropped) dt.items.add(f);
     input.files = dt.files;
     updateInfo(inputId, dt.files);
   });
