@@ -33,22 +33,21 @@ The service will be available on [http://localhost:5000](http://localhost:5000).
 ### Main site `/`
 The landing page shows basic statistics and quick links to the gallery and the upload wizard.
 
-![Main site screenshot](docs/screenshot_main.png)
+![grafik](https://github.com/user-attachments/assets/41cdf81e-d71b-4c66-bbb2-22cbecfe8191)
 
 ### Gallery `/grid`
 Grid view of all LoRAs with infinite scrolling, search box and category filter. Items link to their detail page.
-
-![Gallery screenshot](docs/screenshot_gallery.png)
+![grafik](https://github.com/user-attachments/assets/278fd9dd-9a68-4def-8234-9920ed2d06a4)
 
 ### Detail view `/detail/<filename>`
 Shows all preview images, extracted metadata and category management options for a single LoRA.
 
-![Detail screenshot](docs/screenshot_detail.png)
+![grafik](https://github.com/user-attachments/assets/9db90546-bd4c-47f1-8eb0-dc66a1531849)
 
 ### Upload wizard `/upload_wizard`
 Guided upload page that first asks for the `.safetensors` file and then its previews. Progress bars indicate upload status and the page redirects to the detail view when done.
 
-![Upload wizard screenshot](docs/screenshot_upload_wizard.png)
+![grafik](https://github.com/user-attachments/assets/30a14ca7-bd06-4af6-9e10-12a728b07c06)
 
 ## Bulk import
 Use `bulk_import.py` to ingest an existing collection:
