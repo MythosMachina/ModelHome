@@ -1,4 +1,5 @@
 from typing import Dict, List
+import math
 
 import sqlite3
 from pathlib import Path
@@ -150,7 +151,22 @@ class IndexingAgent:
             )
         # Sort again to ensure uncategorised slot is in correct position
         categories.sort(key=lambda c: c["count"], reverse=True)
-        return categories[:limit]
+        categories = categories[:limit]
+
+        # Calculate relative font sizes for the category cloud
+        if categories:
+            weights = [math.log(c["count"] + 1) for c in categories]
+            min_w = min(weights)
+            max_w = max(weights)
+            span = max_w - min_w or 1
+            min_size = 0.8
+            max_size = 2.0
+            for c, w in zip(categories, weights):
+                rel = (w - min_w) / span
+                size = min_size + rel * (max_size - min_size)
+                c["size"] = round(size, 2)
+
+        return categories
 
     def add_metadata(self, data: Dict[str, str]) -> None:
         self.conn.execute(
