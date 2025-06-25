@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pathlib import Path
 from typing import Iterable, List
 import tempfile
@@ -6,13 +8,15 @@ import zipfile
 import shutil
 
 import config
+from .frontend_agent import FrontendAgent
 
 class UploaderAgent:
     """Handle uploading LoRA files and preview images."""
 
-    def __init__(self, upload_dir: Path | None = None) -> None:
+    def __init__(self, upload_dir: Path | None = None, frontend: FrontendAgent | None = None) -> None:
         self.upload_dir = Path(upload_dir or config.UPLOAD_DIR)
         self.upload_dir.mkdir(parents=True, exist_ok=True)
+        self.frontend = frontend
 
     def save_file(self, filename: str, fileobj) -> Path:
         """Save a single file and return its path."""
@@ -62,6 +66,8 @@ class UploaderAgent:
                         shutil.copyfileobj(src, out)
                     extracted.append(dest)
                     index += 1
+        if self.frontend:
+            self.frontend.refresh_preview_cache(stem)
         return extracted
 
     def delete_lora(self, filename: str) -> None:
@@ -73,9 +79,13 @@ class UploaderAgent:
         for ext in [".png", ".jpg", ".jpeg", ".gif"]:
             for p in self.upload_dir.glob(f"{stem}*{ext}"):
                 p.unlink(missing_ok=True)
+        if self.frontend:
+            self.frontend.invalidate_preview_cache(stem)
 
     def delete_preview(self, filename: str) -> None:
         """Delete a single preview image."""
         path = self.upload_dir / filename
         if path.exists():
             path.unlink()
+        if self.frontend:
+            self.frontend.invalidate_preview_cache(Path(filename).stem)
