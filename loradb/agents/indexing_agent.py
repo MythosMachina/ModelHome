@@ -159,6 +159,14 @@ class IndexingAgent:
         )
         self.conn.commit()
 
+    def unassign_category(self, filename: str, category_id: int) -> None:
+        """Remove ``filename`` from the given ``category_id`` mapping."""
+        self.conn.execute(
+            "DELETE FROM lora_category_map WHERE filename = ? AND category_id = ?",
+            (filename, category_id),
+        )
+        self.conn.commit()
+
     def get_categories_for(self, filename: str) -> List[str]:
         cur = self.conn.cursor()
         rows = cur.execute(
@@ -171,6 +179,20 @@ class IndexingAgent:
             (filename,),
         ).fetchall()
         return [r[0] for r in rows]
+
+    def get_categories_with_ids(self, filename: str) -> List[Dict[str, str]]:
+        """Return categories for ``filename`` including the category IDs."""
+        cur = self.conn.cursor()
+        rows = cur.execute(
+            """
+            SELECT c.id, c.name FROM categories c
+            JOIN lora_category_map m ON c.id = m.category_id
+            WHERE m.filename = ?
+            ORDER BY c.name
+            """,
+            (filename,),
+        ).fetchall()
+        return [{"id": r[0], "name": r[1]} for r in rows]
 
     def search_by_category(
         self,
