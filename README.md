@@ -18,6 +18,7 @@ Detail View
 - **Detail view** – see all previews, metadata and a download link for a single LoRA.
 - **File removal** – delete LoRA files or individual preview images from the interface.
 - **Category management** – organise LoRAs into categories and filter the gallery accordingly.
+- **Remove categories** – unassign a model from a category directly from the detail page.
 
 ## Project layout
 

@@ -5,7 +5,14 @@
   Categories:
   {% if entry.categories %}
     {% for cat in entry.categories %}
-    <span class="badge bg-secondary">{{ cat }}</span>
+    <span class="badge bg-secondary me-1 d-inline-flex align-items-center">
+      {{ cat.name }}
+      <form method="post" action="/unassign_category" class="ms-1 d-inline">
+        <input type="hidden" name="filename" value="{{ entry.filename }}">
+        <input type="hidden" name="category_id" value="{{ cat.id }}">
+        <button type="submit" class="btn-close btn-close-white btn-sm" style="float:none"></button>
+      </form>
+    </span>
     {% endfor %}
   {% else %}
     <span class="text-muted">None</span>

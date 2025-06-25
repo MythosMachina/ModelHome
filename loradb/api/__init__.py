@@ -92,6 +92,15 @@ async def assign_category(request: Request, filename: str = Form(...), category_
         return RedirectResponse(url=f'/detail/{filename}', status_code=303)
     return {'status': 'ok'}
 
+
+@router.post('/unassign_category')
+async def unassign_category(request: Request, filename: str = Form(...), category_id: int = Form(...)):
+    """Remove ``filename`` from the given ``category_id``."""
+    indexer.unassign_category(filename, category_id)
+    if 'text/html' in request.headers.get('accept', ''):
+        return RedirectResponse(url=f'/detail/{filename}', status_code=303)
+    return {'status': 'ok'}
+
 @router.get('/grid', response_class=HTMLResponse)
 async def grid(request: Request):
     query = request.query_params.get('q', '*')
@@ -122,7 +131,7 @@ async def detail(filename: str):
     entry = results[0] if results else {"filename": filename}
     meta = extractor.extract(Path(uploader.upload_dir) / filename)
     entry["metadata"] = meta
-    entry["categories"] = indexer.get_categories_for(filename)
+    entry["categories"] = indexer.get_categories_with_ids(filename)
     categories = indexer.list_categories()
     return frontend.render_detail(entry, categories=categories)
 
