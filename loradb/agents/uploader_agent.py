@@ -70,6 +70,27 @@ class UploaderAgent:
             self.frontend.refresh_preview_cache(stem)
         return extracted
 
+    def save_preview_files(self, stem: str, files: Iterable) -> List[Path]:
+        """Save preview image ``files`` for the LoRA identified by ``stem``."""
+        extracted: List[Path] = []
+        index = 0
+        for file in files:
+            suffix = Path(file.filename).suffix.lower()
+            if suffix not in {".png", ".jpg", ".jpeg", ".gif"}:
+                continue
+            if index == 0:
+                dest_name = f"{stem}{suffix}"
+            else:
+                dest_name = f"{stem}_{index}{suffix}"
+            dest = self.upload_dir / dest_name
+            with dest.open("wb") as out:
+                shutil.copyfileobj(file.file, out)
+            extracted.append(dest)
+            index += 1
+        if self.frontend:
+            self.frontend.refresh_preview_cache(stem)
+        return extracted
+
     def delete_lora(self, filename: str) -> None:
         """Delete a LoRA file and all associated preview images."""
         path = self.upload_dir / filename

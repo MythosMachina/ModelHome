@@ -24,6 +24,11 @@ async def upload_form():
     """Render HTML form for file uploads."""
     return frontend.env.get_template('upload.html').render(title='Upload')
 
+@router.get('/upload_wizard', response_class=HTMLResponse)
+async def upload_wizard_form():
+    """Combined upload form for LoRA and previews."""
+    return frontend.env.get_template('upload_wizard.html').render(title='Upload Wizard')
+
 @router.post('/upload')
 async def upload(request: Request, files: list[UploadFile] = File(...)):
     saved_paths = uploader.save_files(files)
@@ -45,9 +50,20 @@ async def upload_previews_form():
 
 
 @router.post('/upload_previews')
-async def upload_previews(request: Request, file: UploadFile = File(...)):
-    uploader.save_preview_zip(file)
-    frontend.refresh_preview_cache(Path(file.filename).stem)
+async def upload_previews(
+    request: Request,
+    files: list[UploadFile] = File(...),
+    lora: str | None = Form(None),
+):
+    if len(files) == 1 and files[0].filename.lower().endswith('.zip') and lora is None:
+        stem = Path(files[0].filename).stem
+        uploader.save_preview_zip(files[0])
+    else:
+        if not lora:
+            return {"error": "missing lora"}
+        stem = lora
+        uploader.save_preview_files(stem, files)
+    frontend.refresh_preview_cache(stem)
     if 'text/html' in request.headers.get('accept', ''):
         return RedirectResponse(url='/grid', status_code=303)
     return {"status": "ok"}
