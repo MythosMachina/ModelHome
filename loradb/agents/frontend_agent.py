@@ -75,3 +75,8 @@ class FrontendAgent:
         entry.setdefault("metadata", {})
         template = self.env.get_template("detail.html")
         return template.render(title=entry.get("name"), entry=entry, categories=categories or [])
+
+    def render_category_admin(self, categories: List[Dict[str, str]]) -> str:
+        """Render the category administration page."""
+        template = self.env.get_template("category_admin.html")
+        return template.render(title="Category Administration", categories=categories)

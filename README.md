@@ -49,6 +49,9 @@ Guided upload page that first asks for the `.safetensors` file and then its prev
 
 ![grafik](https://github.com/user-attachments/assets/30a14ca7-bd06-4af6-9e10-12a728b07c06)
 
+### Category admin `/category_admin`
+Manage all categories in one place. Create new entries and remove unused ones. A table lists how many LoRAs are assigned to each category.
+
 ## Bulk import
 Use `bulk_import.py` to ingest an existing collection:
 

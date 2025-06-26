@@ -254,6 +254,50 @@ class IndexingAgent:
             categories.insert(0, {"id": self.NO_CATEGORY_ID, "name": self.NO_CATEGORY_NAME})
         return categories
 
+    def list_categories_with_counts(self) -> List[Dict[str, str]]:
+        """Return categories along with the number of assigned LoRAs."""
+        cur = self.conn.cursor()
+        rows = cur.execute(
+            """
+            SELECT c.id, c.name, COUNT(m.filename) AS cnt
+            FROM categories c
+            LEFT JOIN lora_category_map m ON c.id = m.category_id
+            GROUP BY c.id
+            ORDER BY c.name
+            """
+        ).fetchall()
+        categories = [
+            {"id": r[0], "name": r[1], "count": int(r[2])}
+            for r in rows
+        ]
+        cur.execute(
+            """
+            SELECT COUNT(*) FROM lora_index l
+            LEFT JOIN lora_category_map m ON l.filename = m.filename
+            WHERE m.filename IS NULL
+            """
+        )
+        uncategorised = int(cur.fetchone()[0])
+        if uncategorised:
+            categories.insert(
+                0,
+                {
+                    "id": self.NO_CATEGORY_ID,
+                    "name": self.NO_CATEGORY_NAME,
+                    "count": uncategorised,
+                },
+            )
+        return categories
+
+    def delete_category(self, category_id: int) -> None:
+        """Delete a category and its assignments."""
+        self.conn.execute("DELETE FROM categories WHERE id = ?", (category_id,))
+        self.conn.execute(
+            "DELETE FROM lora_category_map WHERE category_id = ?",
+            (category_id,),
+        )
+        self.conn.commit()
+
     def assign_category(self, filename: str, category_id: int) -> None:
         self.conn.execute(
             "INSERT OR IGNORE INTO lora_category_map(filename, category_id) VALUES (?, ?)",
