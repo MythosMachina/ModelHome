@@ -119,6 +119,22 @@ async def unassign_category(request: Request, filename: str = Form(...), categor
         return RedirectResponse(url=f'/detail/{filename}', status_code=303)
     return {'status': 'ok'}
 
+
+@router.get('/category_admin', response_class=HTMLResponse)
+async def category_admin():
+    """Display the category administration page."""
+    categories = indexer.list_categories_with_counts()
+    return frontend.render_category_admin(categories)
+
+
+@router.post('/delete_category')
+async def delete_category(request: Request, category_id: int = Form(...)):
+    indexer.delete_category(category_id)
+    if 'text/html' in request.headers.get('accept', ''):
+        referer = request.headers.get('referer', '/category_admin')
+        return RedirectResponse(url=referer, status_code=303)
+    return {'status': 'ok'}
+
 @router.get('/grid', response_class=HTMLResponse)
 async def grid(request: Request):
     query = request.query_params.get('q', '*')
