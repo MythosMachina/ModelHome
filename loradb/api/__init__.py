@@ -44,9 +44,15 @@ async def upload(request: Request, files: list[UploadFile] = File(...)):
 
 
 @router.get('/upload_previews', response_class=HTMLResponse)
-async def upload_previews_form():
-    """Form for uploading preview zip files."""
-    return frontend.env.get_template('upload_previews.html').render(title='Upload Previews')
+async def upload_previews_form(lora: str | None = None):
+    """Form for uploading preview images or zip files.
+
+    If ``lora`` is provided, the form will target that specific LoRA and allow
+    uploading additional preview images. Otherwise a generic upload form for a
+    preview ZIP is shown.
+    """
+    template = frontend.env.get_template('upload_previews.html')
+    return template.render(title='Upload Previews', lora=lora)
 
 
 @router.post('/upload_previews')

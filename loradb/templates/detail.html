@@ -41,8 +41,9 @@
   <a class="btn btn-primary" href="/uploads/{{ entry.filename }}" download>Download</a>
 </div>
 <form method="post" action="/delete">
-  <div class="d-flex justify-content-end mb-2">
+  <div class="d-flex justify-content-end mb-2 gap-2">
     <button class="btn btn-danger btn-sm" type="submit">Remove Selected</button>
+    <a class="btn btn-secondary btn-sm" href="/upload_previews?lora={{ entry.filename|replace('.safetensors','') }}">Upload Images</a>
   </div>
   <div class="preview-grid mb-3">
     {% for img in entry.previews %}
