@@ -28,6 +28,21 @@ sudo ./setup.sh uninstall    # remove
 
 The service will be available on [http://{serverip}:5000](http://{serverip}:5000).
 
+### Docker builder
+
+An alternative setup runs MyLora inside Docker. Execute the builder script and
+start the created container:
+
+```bash
+cd docker_setup
+python builder.py
+cd app
+docker compose up -d
+```
+
+To update the container later on, run `python update.py` from the same
+directory.
+
 ## Pages overview
 
 ### Main site `/`
