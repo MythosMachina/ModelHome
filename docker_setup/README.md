@@ -19,7 +19,7 @@ Running the script will:
 ## Usage
 
 ```bash
-python builder.py [REPO_URL]
+python builder.py
 ```
 
 The default repository URL points to the main MyLora GitHub repository. After the
