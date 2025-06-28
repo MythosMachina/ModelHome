@@ -4,6 +4,11 @@ This folder contains a helper script to generate a Docker setup for **MyLora**.
 It works on both Windows and Linux by automatically detecting the operating
 system.
 
+## Requirements
+
+- **Windows**: Windows 10 or newer with Docker Desktop installed, or WSL2 with Docker.
+- **Linux**: A modern distribution with Docker Engine and the Docker Compose plugin.
+
 Running the script will:
 
 1. Clone the MyLora repository into `./app` if it is not already present.
