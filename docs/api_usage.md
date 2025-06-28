@@ -1,45 +1,250 @@
 # MyLora REST API
 
-This page provides a short overview of the available GET endpoints.
-Replace `{serverip}` with the actual IP address of your MyLora instance.
+This guide describes all remote API endpoints exposed by MyLora. Replace
+`{serverip}` with the address of your running instance.
 
-## 1. `/search`
-Search LoRA metadata using an SQLite FTS query.
+| Method | Endpoint | Description |
+| ------ | -------- | ----------- |
+| `GET`  | `/search` | Query LoRA metadata |
+| `GET`  | `/grid_data` | Metadata with categories and a preview image |
+| `GET`  | `/categories` | List existing categories |
+| `POST` | `/categories` | Create a new category |
+| `POST` | `/assign_category` | Assign a LoRA to a category |
+| `POST` | `/unassign_category` | Remove a LoRA from a category |
+| `POST` | `/upload` | Upload one or more `.safetensors` files |
+| `POST` | `/upload_previews` | Upload preview images or a preview zip |
+| `POST` | `/delete_category` | Delete a category |
+| `POST` | `/delete` | Delete LoRA or preview files |
+
+Currently only the `GET` and `POST` HTTP verbs are used.
+
+## 1. `/search` (GET)
+
+Search LoRA metadata using an SQLite full text query.
 
 **Parameters**
+
 - `query`: search term or FTS expression
 - `limit`: optional maximum number of results
 - `offset`: start position for paging
 
-**Example**
-```bash
-curl "http://{serverip}:5000/search?query=*"
-```
-Returns a JSON list with fields `filename`, `name`, `architecture`, `tags` and `base_model`.
+**Example call**
 
-## 2. `/grid_data`
-Similar to `/search` but includes categories and a random preview image.
+```bash
+curl "http://{serverip}:5000/search?query=lora"
+```
+
+**Example response**
+
+```json
+[
+  {
+    "filename": "awesome_lora.safetensors",
+    "name": "awesome_lora",
+    "architecture": "LoRA",
+    "tags": "cute,cat",
+    "base_model": "sd15"
+  }
+]
+```
+
+## 2. `/grid_data` (GET)
+
+Return search results including category information and a random preview image.
 
 **Parameters**
+
 - `q`: search query (default `*`)
 - `category`: optional category ID
-- `limit`: results per page (default 50)
+- `limit`: items per page (default `50`)
 - `offset`: paging offset
 
-**Example**
+**Example call**
+
 ```bash
-curl "http://{serverip}:5000/grid_data?q=dog&category=2"
+curl "http://{serverip}:5000/grid_data?q=cat&limit=20"
 ```
-Each list entry contains the `/search` fields plus `categories` and `preview_url`.
 
-## 3. `/categories`
-List all categories. If uncategorised LoRAs exist, a dynamic "No Category" entry is included.
+**Example response**
 
-**Example**
+```json
+[
+  {
+    "filename": "awesome_lora.safetensors",
+    "name": "awesome_lora",
+    "architecture": "LoRA",
+    "tags": "cute,cat",
+    "base_model": "sd15",
+    "categories": ["Animals"],
+    "preview_url": "/uploads/awesome_lora.png"
+  }
+]
+```
+
+## 3. `/categories` (GET)
+
+List all categories. If uncategorised LoRAs exist, a dynamic "No Category" entry
+is added with the ID `0`.
+
+**Example call**
+
 ```bash
 curl "http://{serverip}:5000/categories"
 ```
-Returns a JSON list of objects with `id` and `name`.
+
+**Example response**
+
+```json
+[
+  {"id": 1, "name": "Animals"},
+  {"id": 2, "name": "Portraits"}
+]
+```
+
+## 4. `/categories` (POST)
+
+Create a new category by posting its name as form data.
+
+**Parameters**
+
+- `name`: category name
+
+**Example call**
+
+```bash
+curl -X POST -F "name=Landscapes" http://{serverip}:5000/categories
+```
+
+**Example response**
+
+```json
+{"id": 3}
+```
+
+## 5. `/assign_category` (POST)
+
+Assign an existing LoRA file to a category.
+
+**Parameters**
+
+- `filename`: LoRA filename
+- `category_id`: ID returned from `/categories`
+
+**Example call**
+
+```bash
+curl -X POST -F "filename=awesome_lora.safetensors" -F "category_id=1" \
+  http://{serverip}:5000/assign_category
+```
+
+**Example response**
+
+```json
+{"status": "ok"}
+```
+
+## 6. `/unassign_category` (POST)
+
+Remove a LoRA file from the given category.
+
+**Parameters**
+
+- `filename`: LoRA filename
+- `category_id`: ID of the category to remove
+
+**Example call**
+
+```bash
+curl -X POST -F "filename=awesome_lora.safetensors" -F "category_id=1" \
+  http://{serverip}:5000/unassign_category
+```
+
+**Example response**
+
+```json
+{"status": "ok"}
+```
+
+## 7. `/upload` (POST)
+
+Upload one or more `.safetensors` files. The request must be a multipart form
+with `files` as the field name.
+
+**Example call**
+
+```bash
+curl -X POST -F "files=@awesome_lora.safetensors" \
+  http://{serverip}:5000/upload
+```
+
+**Example response**
+
+```json
+[
+  {
+    "filename": "awesome_lora.safetensors",
+    "name": "awesome_lora",
+    "architecture": "LoRA",
+    "tags": "cute,cat",
+    "base_model": "sd15"
+  }
+]
+```
+
+## 8. `/upload_previews` (POST)
+
+Upload preview images. Send the images as the multipart `files` field. You can
+also upload a ZIP archive containing previews.
+
+**Example call**
+
+```bash
+curl -X POST -F "files=@previews.zip" http://{serverip}:5000/upload_previews
+```
+
+**Example response**
+
+```json
+{"status": "ok"}
+```
+
+## 9. `/delete_category` (POST)
+
+Delete a category by its ID.
+
+**Parameters**
+
+- `category_id`: ID of the category
+
+**Example call**
+
+```bash
+curl -X POST -F "category_id=3" http://{serverip}:5000/delete_category
+```
+
+**Example response**
+
+```json
+{"status": "ok"}
+```
+
+## 10. `/delete` (POST)
+
+Delete LoRA or preview files. Provide one or more `files` values as form data.
+
+**Example call**
+
+```bash
+curl -X POST -F "files=awesome_lora.safetensors" \
+  http://{serverip}:5000/delete
+```
+
+**Example response**
+
+```json
+{"deleted": ["awesome_lora.safetensors"]}
+```
 
 ---
-All endpoints are served by FastAPI on port `5000`.
+
+All endpoints run on port `5000` and return JSON unless noted otherwise.
