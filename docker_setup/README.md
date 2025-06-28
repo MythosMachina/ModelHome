@@ -26,3 +26,16 @@ docker compose up -d
 ```
 
 The web interface will be available at `http://localhost:5000`.
+
+## Updating
+
+Use `update.py` to pull the latest code and recreate the container while keeping
+your data volume:
+
+```bash
+python update.py
+```
+
+The script stops the running container, renames it with a `_backup` suffix and
+starts a freshly built container using the same volumes so no uploads or
+database files are lost.
