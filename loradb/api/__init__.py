@@ -1,7 +1,8 @@
-from fastapi import APIRouter, UploadFile, File, Request, Form
+from fastapi import APIRouter, UploadFile, File, Request, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pathlib import Path
 import random
+import re
 
 import config
 
@@ -17,6 +18,21 @@ extractor = MetadataExtractorAgent()
 indexer = IndexingAgent()
 frontend = FrontendAgent(Path(uploader.upload_dir), Path(config.TEMPLATE_DIR))
 uploader.frontend = frontend
+
+# Regular expression for valid LoRA filenames. Only allow alphanumerics,
+# dashes and underscores ending with the ``.safetensors`` extension. This
+# prevents path traversal and protocol injections in redirect URLs.
+_SAFE_FILENAME_RE = re.compile(r"^[A-Za-z0-9_.-]+\.safetensors$", re.ASCII)
+
+
+def _validate_filename(filename: str) -> str:
+    """Return ``filename`` if it looks safe, otherwise raise ``HTTPException``."""
+    cleaned = Path(filename).name
+    if cleaned != filename or cleaned.startswith('.'):
+        raise HTTPException(status_code=400, detail="Invalid filename")
+    if not _SAFE_FILENAME_RE.fullmatch(cleaned):
+        raise HTTPException(status_code=400, detail="Invalid filename")
+    return cleaned
 
 
 @router.get('/upload', response_class=HTMLResponse)
@@ -111,18 +127,20 @@ async def create_category(request: Request, name: str = Form(...)):
 
 @router.post('/assign_category')
 async def assign_category(request: Request, filename: str = Form(...), category_id: int = Form(...)):
-    indexer.assign_category(filename, category_id)
+    fname = _validate_filename(filename)
+    indexer.assign_category(fname, category_id)
     if 'text/html' in request.headers.get('accept', ''):
-        return RedirectResponse(url=f'/detail/{filename}', status_code=303)
+        return RedirectResponse(url=f'/detail/{fname}', status_code=303)
     return {'status': 'ok'}
 
 
 @router.post('/unassign_category')
 async def unassign_category(request: Request, filename: str = Form(...), category_id: int = Form(...)):
     """Remove ``filename`` from the given ``category_id``."""
-    indexer.unassign_category(filename, category_id)
+    fname = _validate_filename(filename)
+    indexer.unassign_category(fname, category_id)
     if 'text/html' in request.headers.get('accept', ''):
-        return RedirectResponse(url=f'/detail/{filename}', status_code=303)
+        return RedirectResponse(url=f'/detail/{fname}', status_code=303)
     return {'status': 'ok'}
 
 
