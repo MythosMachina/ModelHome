@@ -2,6 +2,9 @@
 
 MyLora provides a modern web interface to manage LoRA model files (`.safetensors`) alongside their preview images. The application is built with FastAPI and ships with a sleek dark mode interface.
 
+# Proudly featured at TurtlesAI!
+Link -> https://www.turtlesai.com/en/pages-2946/mylora-intelligent-and-comprehensive-management-of
+
 ## Highlights
 
 - **Upload wizard** – drag & drop a LoRA file and its previews in one go.
