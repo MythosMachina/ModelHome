@@ -1,3 +1,8 @@
+[![MIT License](https://img.shields.io/github/license/AsaTyr2018/MyLora)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/AsaTyr2018/MyLora?style=social)](https://github.com/AsaTyr2018/MyLora/stargazers)
+[![LoRAs Managed](https://img.shields.io/badge/LoRAs-Unlimited-purple?logo=fastapi)](https://github.com/AsaTyr2018/MyLora)
+[![Featured on TurtlesAI](https://img.shields.io/badge/featured%20on-TurtlesAI-blueviolet?logo=readthedocs&logoColor=white)](https://www.turtlesai.com/en/pages-2946/mylora-intelligent-and-comprehensive-management-of)
+
 # MyLora - One site to Rule them all!
 
 MyLora provides a modern web interface to manage LoRA model files (`.safetensors`) alongside their preview images. The application is built with FastAPI and ships with a sleek dark mode interface.
@@ -13,6 +18,11 @@ Link -> https://www.turtlesai.com/en/pages-2946/mylora-intelligent-and-comprehen
 - **Category management** – create and assign categories with just a few clicks.
 - **Local migration** – scripts are included to import existing collections or migrate old category files.
 - **Responsive design** – works great on desktop and mobile.
+
+## Coming soon: Plugin support 
+
+MyLora is evolving into a modular platform!  
+A full plugin system is being developed to allow custom extensions.
 
 ## Quick setup
 
