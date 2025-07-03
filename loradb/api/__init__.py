@@ -144,6 +144,35 @@ async def unassign_category(request: Request, filename: str = Form(...), categor
     return {'status': 'ok'}
 
 
+@router.post('/assign_categories')
+async def assign_categories(
+    request: Request,
+    files: list[str] = Form(...),
+    category_id: int | None = Form(None),
+    new_category: str | None = Form(None),
+):
+    if new_category:
+        cid = indexer.create_category(new_category)
+    elif category_id is not None:
+        cid = category_id
+    else:
+        raise HTTPException(status_code=400, detail="missing category")
+    cleaned = [_validate_filename(f) for f in files]
+    for fname in cleaned:
+        indexer.assign_category(fname, cid)
+    if 'text/html' in request.headers.get('accept', ''):
+        return RedirectResponse(url='/grid', status_code=303)
+    return {'status': 'ok'}
+
+
+@router.post('/bulk_assign', response_class=HTMLResponse)
+async def bulk_assign(request: Request):
+    form = await request.form()
+    files = form.getlist('files')
+    categories = indexer.list_categories()
+    return frontend.render_bulk_assign(files, categories)
+
+
 @router.get('/category_admin', response_class=HTMLResponse)
 async def category_admin():
     """Display the category administration page."""

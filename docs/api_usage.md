@@ -10,6 +10,7 @@ This guide describes all remote API endpoints exposed by MyLora. Replace
 | `GET`  | `/categories` | List existing categories |
 | `POST` | `/categories` | Create a new category |
 | `POST` | `/assign_category` | Assign a LoRA to a category |
+| `POST` | `/assign_categories` | Assign multiple LoRAs to a category |
 | `POST` | `/unassign_category` | Remove a LoRA from a category |
 | `POST` | `/upload` | Upload one or more `.safetensors` files |
 | `POST` | `/upload_previews` | Upload preview images or a preview zip |
@@ -143,7 +144,30 @@ curl -X POST -F "filename=awesome_lora.safetensors" -F "category_id=1" \
 {"status": "ok"}
 ```
 
-## 6. `/unassign_category` (POST)
+## 6. `/assign_categories` (POST)
+
+Assign multiple LoRA files to a category.
+
+**Parameters**
+
+- `files`: one or more LoRA filenames
+- `category_id`: existing category ID
+- `new_category`: optional name to create
+
+**Example call**
+
+```bash
+curl -X POST -F "files=a.safetensors" -F "files=b.safetensors" \
+  -F "category_id=1" http://{serverip}:5000/assign_categories
+```
+
+**Example response**
+
+```json
+{"status": "ok"}
+```
+
+## 7. `/unassign_category` (POST)
 
 Remove a LoRA file from the given category.
 
@@ -165,7 +189,7 @@ curl -X POST -F "filename=awesome_lora.safetensors" -F "category_id=1" \
 {"status": "ok"}
 ```
 
-## 7. `/upload` (POST)
+## 8. `/upload` (POST)
 
 Upload one or more `.safetensors` files. The request must be a multipart form
 with `files` as the field name.
@@ -191,7 +215,7 @@ curl -X POST -F "files=@awesome_lora.safetensors" \
 ]
 ```
 
-## 8. `/upload_previews` (POST)
+## 9. `/upload_previews` (POST)
 
 Upload preview images. Send the images as the multipart `files` field. You can
 also upload a ZIP archive containing previews.
@@ -208,7 +232,7 @@ curl -X POST -F "files=@previews.zip" http://{serverip}:5000/upload_previews
 {"status": "ok"}
 ```
 
-## 9. `/delete_category` (POST)
+## 10. `/delete_category` (POST)
 
 Delete a category by its ID.
 
@@ -228,7 +252,7 @@ curl -X POST -F "category_id=3" http://{serverip}:5000/delete_category
 {"status": "ok"}
 ```
 
-## 10. `/delete` (POST)
+## 11. `/delete` (POST)
 
 Delete LoRA or preview files. Provide one or more `files` values as form data.
 
