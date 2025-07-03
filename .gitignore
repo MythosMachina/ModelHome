@@ -1,2 +1,3 @@
 __pycache__/
 *.pyc
+loradb/search_index/index.db

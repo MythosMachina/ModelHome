@@ -19,15 +19,23 @@ env = Environment(loader=FileSystemLoader(config.TEMPLATE_DIR))
 app.include_router(api_router)
 
 @app.get("/", response_class=HTMLResponse)
-async def index():
-    template = env.get_template("index.html")
+async def dashboard():
+    template = env.get_template("dashboard.html")
     stats = {
         "lora_count": indexer.lora_count(),
         "preview_count": indexer.preview_count(),
         "category_count": indexer.category_count(),
+        "storage_volume": indexer.storage_volume(),
         "top_categories": indexer.top_categories(limit=20),
     }
-    return template.render(title="LoRA Database", stats=stats)
+    recent_categories = indexer.recent_categories(limit=5)
+    recent_loras = indexer.recent_loras(limit=5)
+    return template.render(
+        title="Dashboard",
+        stats=stats,
+        recent_categories=recent_categories,
+        recent_loras=recent_loras,
+    )
 
 
 if __name__ == "__main__":
