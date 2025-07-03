@@ -16,6 +16,7 @@ Link -> https://www.turtlesai.com/en/pages-2946/mylora-intelligent-and-comprehen
 - **Automatic metadata extraction** – tags, dimension and other information are parsed from the model files.
 - **Searchable gallery** – browse all models, filter by tag or category and download directly.
 - **Category management** – create and assign categories with just a few clicks.
+- **Bulk category assignment** – select multiple LoRAs in the gallery and add them to a category.
 - **Local migration** – scripts are included to import existing collections or migrate old category files.
 - **Responsive design** – works great on desktop and mobile.
 

@@ -81,3 +81,8 @@ class FrontendAgent:
         """Render the category administration page."""
         template = self.env.get_template("category_admin.html")
         return template.render(title="Category Administration", categories=categories)
+
+    def render_bulk_assign(self, files: List[str], categories: List[Dict[str, str]]) -> str:
+        """Render form to assign multiple LoRAs to a category."""
+        template = self.env.get_template("bulk_assign.html")
+        return template.render(title="Add to Category", files=files, categories=categories)

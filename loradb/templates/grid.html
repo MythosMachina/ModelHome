@@ -18,8 +18,9 @@
   </div>
 </form>
 <form method="post" action="/delete">
-  <div class="d-flex justify-content-end mb-2">
+  <div class="d-flex justify-content-end mb-2 gap-2">
     <button class="btn btn-danger btn-sm" type="submit">Remove Selected</button>
+    <button class="btn btn-secondary btn-sm" type="submit" formaction="/bulk_assign" formmethod="post">Add to Category</button>
   </div>
   <div class="gallery-grid" id="gallery">
     {% for entry in entries %}
