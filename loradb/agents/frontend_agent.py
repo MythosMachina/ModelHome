@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import List, Dict
 import random
+import re
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -18,17 +19,17 @@ class FrontendAgent:
         """Return preview URLs for ``stem`` using a simple cache."""
         if stem in self.preview_cache:
             return self.preview_cache[stem]
-        # Include numbered variants like "name_1.png" as well as the base
-        patterns = [
-            f"{stem}.png",
-            f"{stem}.jpg",
-            f"{stem}_*.png",
-            f"{stem}_*.jpg",
-        ]
+        # Only match files for this exact stem. We allow either an exact
+        # filename match (``<stem>.png``) or a numeric suffix
+        # (``<stem>_1.png``). Previous glob patterns like ``<stem>_*.png``
+        # would also match names such as ``<stem>_other.png`` which belongs to
+        # a different LoRA. Use a regular expression to avoid such collisions.
+        pattern = re.compile(rf"^{re.escape(stem)}(?:_[0-9]+)?\.(?:png|jpg)$", re.IGNORECASE)
         matches: List[str] = []
-        for pattern in patterns:
-            matches.extend([str(p) for p in self.uploads_dir.glob(pattern)])
-        urls = [f"/uploads/{Path(m).name}" for m in matches]
+        for p in self.uploads_dir.iterdir():
+            if pattern.match(p.name):
+                matches.append(str(p))
+        urls = [f"/uploads/{Path(m).name}" for m in sorted(matches)]
         self.preview_cache[stem] = urls
         return urls
 
