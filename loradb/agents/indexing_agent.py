@@ -401,3 +401,46 @@ class IndexingAgent:
             }
             for r in rows
         ]
+
+    # --- Additional helpers for dashboard --------------------------------
+
+    def storage_volume(self) -> int:
+        """Return the total size in bytes of all LoRA files."""
+        uploads = Path(config.UPLOAD_DIR)
+        total = 0
+        if uploads.exists():
+            for p in uploads.glob("*.safetensors"):
+                try:
+                    total += p.stat().st_size
+                except OSError:
+                    pass
+        return total
+
+    def recent_loras(self, limit: int = 5) -> List[Dict[str, str]]:
+        """Return most recently indexed LoRAs."""
+        cur = self.conn.cursor()
+        rows = cur.execute(
+            "SELECT filename, name FROM lora_index ORDER BY rowid DESC LIMIT ?",
+            (limit,),
+        ).fetchall()
+        return [
+            {"filename": r[0], "name": r[1]} for r in rows
+        ]
+
+    def recent_categories(self, limit: int = 5) -> List[Dict[str, str]]:
+        """Return categories ordered by most recent assignment or creation."""
+        cur = self.conn.cursor()
+        rows = cur.execute(
+            """
+            SELECT c.id, c.name, MAX(COALESCE(m.rowid, c.id)) AS last_id
+            FROM categories c
+            LEFT JOIN lora_category_map m ON c.id = m.category_id
+            GROUP BY c.id
+            ORDER BY last_id DESC
+            LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
+        return [
+            {"id": r[0], "name": r[1]} for r in rows
+        ]
