@@ -56,4 +56,5 @@ def test_access_denied_page_for_user():
     resp = client.get("/admin/users", headers={"accept": "text/html"})
     assert resp.status_code == 403
     assert "Permission, you have not" in resp.text
+    assert "/static/accessdenied.jpg" in resp.text
     os.environ["TESTING"] = "1"
