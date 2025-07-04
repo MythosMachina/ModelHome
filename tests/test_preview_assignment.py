@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+os.environ["TESTING"] = "1"
 
 from loradb.agents.frontend_agent import FrontendAgent
 
@@ -21,4 +22,3 @@ def test_preview_filtering(tmp_path):
     assert "/uploads/Mizuki.png" in previews
     assert "/uploads/Mizuki_18.png" in previews
     assert "/uploads/Mizuki_Furui_SDXL_10.png" not in previews
-

@@ -4,6 +4,8 @@ safetensors
 python-multipart
 Pillow
 Jinja2
+httpx
+itsdangerous
 
 torch
-
+passlib
