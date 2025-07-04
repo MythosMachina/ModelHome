@@ -46,6 +46,14 @@ sudo ./setup.sh uninstall    # remove
 
 The service will be available on [http://{serverip}:5000](http://{serverip}:5000).
 
+## Admin User Setup (!Important!)
+
+To set up the first admin user, run the following command in the root folder of the script:
+
+```bash
+python3 ./usersetup.py {user} {password}
+```
+
 ### Docker builder
 
 An alternative setup runs MyLora inside Docker. Execute the builder script and
