@@ -31,6 +31,12 @@ async def auth_middleware(request: Request, call_next):
     user = None
     if request.session.get("user_id"):
         user = auth.get_user_by_id(request.session["user_id"])
+    elif request.cookies.get("remember_user_id"):
+        uid = request.cookies.get("remember_user_id")
+        if uid and uid.isdigit():
+            user = auth.get_user_by_id(int(uid))
+            if user:
+                request.session["user_id"] = user["id"]
     if not user:
         user = {"username": "guest", "role": "guest"}
     request.state.user = user
@@ -98,12 +104,27 @@ async def login_form(request: Request):
 
 
 @app.post("/login", response_class=HTMLResponse)
-async def login(request: Request, username: str = Form(...), password: str = Form(...)):
+async def login(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...),
+    save_account: str | None = Form(None),
+):
     auth = request.app.state.auth
     if auth.verify_user(username, password):
         user = auth.get_user(username)
         request.session["user_id"] = user["id"]
-        return RedirectResponse(url="/", status_code=303)
+        response = RedirectResponse(url="/", status_code=303)
+        if save_account:
+            response.set_cookie(
+                "remember_user_id",
+                str(user["id"]),
+                max_age=60 * 60 * 24 * 7,
+                httponly=True,
+            )
+        else:
+            response.delete_cookie("remember_user_id")
+        return response
     template = env.get_template("login.html")
     return template.render(title="Login", error="Invalid credentials", user=None)
 
@@ -111,7 +132,9 @@ async def login(request: Request, username: str = Form(...), password: str = For
 @app.get("/logout")
 async def logout(request: Request):
     request.session.clear()
-    return RedirectResponse(url="/login", status_code=303)
+    response = RedirectResponse(url="/login", status_code=303)
+    response.delete_cookie("remember_user_id")
+    return response
 
 
 if __name__ == "__main__":
