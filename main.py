@@ -13,7 +13,6 @@ from loradb.api import router as api_router
 from loradb.auth import AuthManager
 
 app = FastAPI(title="LoRA Database")
-app.add_middleware(SessionMiddleware, secret_key=config.SECRET_KEY)
 app.state.auth = AuthManager()
 
 app.mount("/static", StaticFiles(directory=config.STATIC_DIR), name="static")
@@ -61,6 +60,10 @@ async def auth_middleware(request: Request, call_next):
     if any(path.startswith(p) for p in admin_paths) and user.get("role") != "admin":
         return HTMLResponse("Forbidden", status_code=403)
     return await call_next(request)
+
+
+# Add session support after registering the auth middleware so it runs earlier
+app.add_middleware(SessionMiddleware, secret_key=config.SECRET_KEY)
 
 
 @app.get("/", response_class=HTMLResponse)
