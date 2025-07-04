@@ -42,6 +42,7 @@ async def auth_middleware(request: Request, call_next):
         or path.startswith("/uploads")
         or path.startswith("/login")
         or path == "/showcase"
+        or path.startswith("/showcase_detail")
     ):
         return await call_next(request)
     if user.get("role") == "guest":
