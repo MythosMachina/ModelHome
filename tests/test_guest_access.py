@@ -41,3 +41,19 @@ def test_custom_404_page():
     resp = client.get("/no_such_page", headers={"accept": "text/html"})
     assert resp.status_code == 404
     assert "Awww" in resp.text
+
+
+def test_access_denied_page_for_user():
+    os.environ.pop("TESTING", None)
+    import sqlite3
+    main.app.state.auth.conn.close()
+    main.app.state.auth.conn = sqlite3.connect(
+        main.app.state.auth.db_path, check_same_thread=False
+    )
+    main.app.state.auth._ensure_table()
+    main.app.state.auth.create_user("regular", "secret", role="user")
+    client.post("/login", data={"username": "regular", "password": "secret"})
+    resp = client.get("/admin/users", headers={"accept": "text/html"})
+    assert resp.status_code == 403
+    assert "Permission, you have not" in resp.text
+    os.environ["TESTING"] = "1"
