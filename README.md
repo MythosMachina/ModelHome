@@ -20,7 +20,7 @@ Link -> https://www.turtlesai.com/en/pages-2946/mylora-intelligent-and-comprehen
 - **Local migration** – scripts are included to import existing collections or migrate old category files.
 - **Responsive design** – works great on desktop and mobile.
 
-## Coming soon: Plugin support 
+## Coming soon: Plugin support (Delayed)
 
 MyLora is evolving into a modular platform!  
 A full plugin system is being developed to allow custom extensions.
