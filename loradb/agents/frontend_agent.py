@@ -1,7 +1,7 @@
-from pathlib import Path
-from typing import List, Dict
 import random
 import re
+from pathlib import Path
+from typing import Dict, List
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -24,7 +24,9 @@ class FrontendAgent:
         # (``<stem>_1.png``). Previous glob patterns like ``<stem>_*.png``
         # would also match names such as ``<stem>_other.png`` which belongs to
         # a different LoRA. Use a regular expression to avoid such collisions.
-        pattern = re.compile(rf"^{re.escape(stem)}(?:_[0-9]+)?\.(?:png|jpg)$", re.IGNORECASE)
+        pattern = re.compile(
+            rf"^{re.escape(stem)}(?:_[0-9]+)?\.(?:png|jpg)$", re.IGNORECASE
+        )
         matches: List[str] = []
         for p in self.uploads_dir.iterdir():
             if pattern.match(p.name):
@@ -52,6 +54,7 @@ class FrontendAgent:
         categories: List[Dict[str, str]] | None = None,
         selected_category: str | None = None,
         limit: int = 50,
+        user: Dict[str, str] | None = None,
     ) -> str:
         for e in entries:
             stem = Path(e.get("filename", "")).stem
@@ -65,24 +68,55 @@ class FrontendAgent:
             categories=categories or [],
             selected_category=selected_category or "",
             limit=limit,
+            user=user,
         )
 
     def render_detail(
-        self, entry: Dict[str, str], categories: List[Dict[str, str]] | None = None
+        self,
+        entry: Dict[str, str],
+        categories: List[Dict[str, str]] | None = None,
+        user: Dict[str, str] | None = None,
     ) -> str:
         stem = Path(entry.get("filename", "")).stem
         previews = self._find_previews(stem)
         entry["previews"] = previews
         entry.setdefault("metadata", {})
         template = self.env.get_template("detail.html")
-        return template.render(title=entry.get("name"), entry=entry, categories=categories or [])
+        return template.render(
+            title=entry.get("name"),
+            entry=entry,
+            categories=categories or [],
+            user=user,
+        )
 
-    def render_category_admin(self, categories: List[Dict[str, str]]) -> str:
+    def render_category_admin(
+        self, categories: List[Dict[str, str]], user: Dict[str, str] | None = None
+    ) -> str:
         """Render the category administration page."""
         template = self.env.get_template("category_admin.html")
-        return template.render(title="Category Administration", categories=categories)
+        return template.render(
+            title="Category Administration",
+            categories=categories,
+            user=user,
+        )
 
-    def render_bulk_assign(self, files: List[str], categories: List[Dict[str, str]]) -> str:
+    def render_bulk_assign(
+        self,
+        files: List[str],
+        categories: List[Dict[str, str]],
+        user: Dict[str, str] | None = None,
+    ) -> str:
         """Render form to assign multiple LoRAs to a category."""
         template = self.env.get_template("bulk_assign.html")
-        return template.render(title="Add to Category", files=files, categories=categories)
+        return template.render(
+            title="Add to Category",
+            files=files,
+            categories=categories,
+            user=user,
+        )
+
+    def render_user_admin(
+        self, users: List[Dict[str, str]], user: Dict[str, str] | None = None
+    ) -> str:
+        template = self.env.get_template("user_admin.html")
+        return template.render(title="User Administration", users=users, user=user)
