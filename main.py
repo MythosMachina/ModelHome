@@ -1,11 +1,12 @@
 import os
 from pathlib import Path
 
-from fastapi import FastAPI, Form, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import FastAPI, Form, Request, HTTPException
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from jinja2 import Environment, FileSystemLoader
 from starlette.middleware.sessions import SessionMiddleware
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 import config
 from loradb.api import indexer
@@ -74,6 +75,17 @@ async def auth_middleware(request: Request, call_next):
 
 # Add session support after registering the auth middleware so it runs earlier
 app.add_middleware(SessionMiddleware, secret_key=config.SECRET_KEY)
+
+
+@app.exception_handler(StarletteHTTPException)
+async def custom_http_exception(request: Request, exc: StarletteHTTPException):
+    if exc.status_code == 404 and "text/html" in request.headers.get("accept", ""):
+        template = env.get_template("404.html")
+        return HTMLResponse(
+            template.render(title="File Not Found", user=request.state.user),
+            status_code=404,
+        )
+    return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
 
 
 @app.get("/", response_class=HTMLResponse)
