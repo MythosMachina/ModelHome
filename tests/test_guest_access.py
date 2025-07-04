@@ -40,7 +40,7 @@ def test_custom_404_page():
     os.environ["TESTING"] = "1"
     resp = client.get("/no_such_page", headers={"accept": "text/html"})
     assert resp.status_code == 404
-    assert "Awww" in resp.text
+    assert "/static/404.jpg" in resp.text
 
 
 def test_access_denied_page_for_user():
