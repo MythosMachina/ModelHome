@@ -31,5 +31,6 @@ def test_guest_showcase_detail_access():
     os.environ.pop("TESTING", None)
     resp = client.get("/showcase_detail/test.safetensors")
     assert resp.status_code == 200
-    assert "Download" in resp.text
+    assert "Download" not in resp.text
+    assert "metadata-table" not in resp.text
     os.environ["TESTING"] = "1"
