@@ -34,3 +34,10 @@ def test_guest_showcase_detail_access():
     assert "Download" not in resp.text
     assert "metadata-table" not in resp.text
     os.environ["TESTING"] = "1"
+
+
+def test_custom_404_page():
+    os.environ["TESTING"] = "1"
+    resp = client.get("/no_such_page", headers={"accept": "text/html"})
+    assert resp.status_code == 404
+    assert "Awww" in resp.text

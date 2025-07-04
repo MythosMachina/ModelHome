@@ -249,9 +249,12 @@ async def grid(request: Request):
 
 @router.get("/detail/{filename}", response_class=HTMLResponse)
 async def detail(request: Request, filename: str):
+    file_path = Path(uploader.upload_dir) / filename
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="not found")
     results = indexer.search(f'"{filename}"')
     entry = results[0] if results else {"filename": filename}
-    meta = extractor.extract(Path(uploader.upload_dir) / filename)
+    meta = extractor.extract(file_path)
     entry["metadata"] = meta
     entry["categories"] = indexer.get_categories_with_ids(filename)
     categories = indexer.list_categories()
