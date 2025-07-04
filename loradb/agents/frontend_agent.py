@@ -100,6 +100,22 @@ class FrontendAgent:
             user=user,
         )
 
+    def render_showcase_detail(
+        self,
+        entry: Dict[str, str],
+        user: Dict[str, str] | None = None,
+    ) -> str:
+        """Render a simplified detail view used for the public showcase."""
+        stem = Path(entry.get("filename", "")).stem
+        previews = self._find_previews(stem)
+        entry["previews"] = previews
+        template = self.env.get_template("showcase_detail.html")
+        return template.render(
+            title=entry.get("name"),
+            entry=entry,
+            user=user,
+        )
+
     def render_category_admin(
         self, categories: List[Dict[str, str]], user: Dict[str, str] | None = None
     ) -> str:
