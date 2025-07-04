@@ -71,6 +71,17 @@ class FrontendAgent:
             user=user,
         )
 
+    def render_showcase(
+        self, entries: List[Dict[str, str]], user: Dict[str, str] | None = None
+    ) -> str:
+        """Render the public showcase grid."""
+        for e in entries:
+            stem = Path(e.get("filename", "")).stem
+            previews = self._find_previews(stem)
+            e["preview_url"] = random.choice(previews) if previews else None
+        template = self.env.get_template("showcase.html")
+        return template.render(title="Model Showcase", entries=entries, user=user)
+
     def render_detail(
         self,
         entry: Dict[str, str],

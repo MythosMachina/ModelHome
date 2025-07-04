@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="mb-4">Model Showcase</h1>
+<div class="gallery-grid">
+  {% for entry in entries %}
+  <div class="gallery-item">
+    {% if entry.preview_url %}
+    <img src="{{ entry.preview_url }}" alt="preview">
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

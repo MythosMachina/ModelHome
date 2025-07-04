@@ -121,6 +121,14 @@ async def grid_data(
     return entries
 
 
+@router.get("/showcase", response_class=HTMLResponse)
+async def showcase(request: Request):
+    """Public showcase page listing models in the "Public viewing" category."""
+    public_id = indexer.create_category("Public viewing")
+    entries = indexer.search_by_category(public_id, limit=100)
+    return frontend.render_showcase(entries, user=request.state.user)
+
+
 @router.get("/categories")
 async def list_categories():
     return indexer.list_categories()

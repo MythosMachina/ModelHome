@@ -31,18 +31,21 @@ async def auth_middleware(request: Request, call_next):
     user = None
     if request.session.get("user_id"):
         user = auth.get_user_by_id(request.session["user_id"])
+    if not user:
+        user = {"username": "guest", "role": "guest"}
     request.state.user = user
     if os.environ.get("TESTING"):
         return await call_next(request)
     path = request.url.path
     if (
-        path in {"/login", "/logout"}
-        or path.startswith("/static")
+        path.startswith("/static")
         or path.startswith("/uploads")
+        or path.startswith("/login")
+        or path == "/showcase"
     ):
         return await call_next(request)
-    if not user:
-        return RedirectResponse(url="/login")
+    if user.get("role") == "guest":
+        return RedirectResponse(url="/showcase")
     admin_paths = [
         "/upload",
         "/upload_wizard",
