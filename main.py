@@ -52,13 +52,13 @@ async def auth_middleware(request: Request, call_next):
         "/unassign_category",
         "/assign_categories",
         "/bulk_assign",
-        "/category_admin",
         "/delete_category",
         "/delete",
         "/admin/users",
     ]
     if any(path.startswith(p) for p in admin_paths) and user.get("role") != "admin":
-        return HTMLResponse("Forbidden", status_code=403)
+        template = env.get_template("access_denied.html")
+        return HTMLResponse(template.render(title="Access Denied", user=user), status_code=403)
     return await call_next(request)
 
 
