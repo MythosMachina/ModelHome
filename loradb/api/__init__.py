@@ -129,6 +129,17 @@ async def showcase(request: Request):
     return frontend.render_showcase(entries, user=request.state.user)
 
 
+@router.get("/showcase_detail/{filename}", response_class=HTMLResponse)
+async def showcase_detail(request: Request, filename: str):
+    """Guest accessible detail view for ``filename``."""
+    results = indexer.search(f'"{filename}"')
+    entry = results[0] if results else {"filename": filename}
+    meta = extractor.extract(Path(uploader.upload_dir) / filename)
+    entry["metadata"] = meta
+    entry["categories"] = indexer.get_categories_with_ids(filename)
+    return frontend.render_detail(entry, categories=[], user=request.state.user)
+
+
 @router.get("/categories")
 async def list_categories():
     return indexer.list_categories()
