@@ -109,7 +109,7 @@ async def grid_data(
 ):
     if not q:
         q = "*"
-    if category:
+    if category is not None:
         entries = indexer.search_by_category(category, q, limit=limit, offset=offset)
     else:
         entries = indexer.search(q, limit=limit, offset=offset)
