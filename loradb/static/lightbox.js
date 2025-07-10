@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+function initLightbox() {
   const modalEl = document.getElementById('previewModal');
   if (!modalEl) return;
   const modal = new bootstrap.Modal(modalEl);
@@ -36,4 +36,10 @@ document.addEventListener('DOMContentLoaded', () => {
       modal.hide();
     }
   });
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initLightbox);
+} else {
+  initLightbox();
+}
