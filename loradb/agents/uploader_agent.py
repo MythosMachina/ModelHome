@@ -26,19 +26,22 @@ class UploaderAgent:
         return dest
 
     def save_files(self, files: Iterable) -> List[Path]:
-        """Save multiple uploaded files."""
+        """Save multiple uploaded files.
+
+        If a file with the exact same name already exists in the uploads
+        directory the upload is aborted by raising ``FileExistsError``.
+        """
         saved: List[Path] = []
+        seen: set[Path] = set()
         for file in files:
             name = Path(file.filename).name
             dest = self.upload_dir / name
-            # Ensure unique destination
-            counter = 1
-            while dest.exists():
-                dest = self.upload_dir / f"{dest.stem}_{counter}{dest.suffix}"
-                counter += 1
+            if dest.exists() or dest in seen:
+                raise FileExistsError(f"{name} already exists")
             with dest.open("wb") as f:
                 shutil.copyfileobj(file.file, f)
             saved.append(dest)
+            seen.add(dest)
         return saved
 
     def save_preview_zip(self, zip_file) -> List[Path]:
