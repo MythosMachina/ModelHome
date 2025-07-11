@@ -22,15 +22,31 @@
   </div>
 </div>
 <script>
-function updateInfo(inputId, files) {
+async function updateInfo(inputId, files) {
   const info = document.getElementById(inputId.replace('input', 'info'));
   if (!info) return;
+  const btn = document.getElementById('upload-safetensors');
   if (!files || files.length === 0) {
     info.textContent = '';
+    info.classList.remove('text-danger');
+    if (btn) btn.disabled = false;
   } else if (files.length === 1) {
     info.textContent = files[0].name;
+    info.classList.remove('text-danger');
+    if (btn && inputId === 'safetensors-input') {
+      const resp = await fetch('/uploads/' + encodeURIComponent(files[0].name), {method: 'HEAD'});
+      if (resp.ok) {
+        info.textContent = files[0].name + ' already exists';
+        info.classList.add('text-danger');
+        btn.disabled = true;
+      } else {
+        btn.disabled = false;
+      }
+    }
   } else {
     info.textContent = files.length + ' files selected';
+    info.classList.remove('text-danger');
+    if (btn) btn.disabled = false;
   }
 }
 
@@ -83,9 +99,11 @@ function setupArea(areaId, inputId) {
     const dt = new DataTransfer();
     for (const f of dropped) dt.items.add(f);
     input.files = dt.files;
-    updateInfo(inputId, dt.files);
+    await updateInfo(inputId, dt.files);
   });
-  input.addEventListener('change', () => updateInfo(inputId, input.files));
+  input.addEventListener('change', async () => {
+    await updateInfo(inputId, input.files);
+  });
 }
 setupArea('drop-safetensors', 'safetensors-input');
 setupArea('drop-previews', 'previews-input');
@@ -146,7 +164,7 @@ uploadBtn1.addEventListener('click', async () => {
     loraStem = loraFilename.replace(/\.safetensors$/i, '');
     step1.style.display = 'none';
     step2.style.display = 'block';
-    updateInfo('safetensors-input', []);
+    await updateInfo('safetensors-input', []);
   } catch (err) {
     alert('Upload failed');
   }
