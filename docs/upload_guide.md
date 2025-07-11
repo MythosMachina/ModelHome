@@ -17,7 +17,7 @@ The wizard is the easiest way when you want to upload a new LoRA along with its 
 
 Two separate pages are available for small manual uploads:
 
-- `http://{serverip}:5000/upload` – Select one or multiple `.safetensors` files and submit the form.
+- `http://{serverip}:5000/upload` – Select one or multiple `.safetensors` files and submit the form. If a file with the same name already exists the upload is rejected with an error.
 - `http://{serverip}:5000/upload_previews` – Upload preview images for an existing LoRA or a ZIP archive containing previews. If you pass a `lora` query parameter the form will automatically target that LoRA.
 
 After sending the previews you can go to `/detail/<filename>` to review the images and metadata.

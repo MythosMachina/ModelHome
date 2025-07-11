@@ -192,7 +192,8 @@ curl -X POST -F "filename=awesome_lora.safetensors" -F "category_id=1" \
 ## 8. `/upload` (POST)
 
 Upload one or more `.safetensors` files. The request must be a multipart form
-with `files` as the field name.
+with `files` as the field name. If a file with the exact same name already
+exists the request fails with HTTP status `409`.
 
 **Example call**
 

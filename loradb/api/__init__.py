@@ -54,7 +54,10 @@ async def upload_wizard_form(request: Request):
 
 @router.post("/upload")
 async def upload(request: Request, files: list[UploadFile] = File(...)):
-    saved_paths = uploader.save_files(files)
+    try:
+        saved_paths = uploader.save_files(files)
+    except FileExistsError as exc:
+        raise HTTPException(status_code=409, detail=str(exc))
     results = []
     for path in saved_paths:
         meta = extractor.extract(Path(path))
