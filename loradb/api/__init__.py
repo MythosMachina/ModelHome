@@ -135,8 +135,9 @@ async def showcase(request: Request):
 @router.get("/showcase_detail/{filename}", response_class=HTMLResponse)
 async def showcase_detail(request: Request, filename: str):
     """Guest accessible detail view for ``filename``."""
-    results = indexer.search(f'"{filename}"')
-    entry = results[0] if results else {"filename": filename}
+    entry = indexer.get_entry(filename)
+    if not entry:
+        entry = {"filename": filename}
     return frontend.render_showcase_detail(entry, user=request.state.user)
 
 
@@ -255,8 +256,9 @@ async def detail(request: Request, filename: str):
     file_path = Path(uploader.upload_dir) / filename
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="not found")
-    results = indexer.search(f'"{filename}"')
-    entry = results[0] if results else {"filename": filename}
+    entry = indexer.get_entry(filename)
+    if not entry:
+        entry = {"filename": filename}
     meta = extractor.extract(file_path)
     entry["metadata"] = meta
     entry["categories"] = indexer.get_categories_with_ids(filename)

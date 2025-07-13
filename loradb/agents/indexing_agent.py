@@ -7,6 +7,7 @@ from pathlib import Path
 import config
 from .metadata_extractor_agent import MetadataExtractorAgent
 
+
 class IndexingAgent:
     """Maintain search index for LoRA metadata using SQLite FTS5."""
 
@@ -128,10 +129,7 @@ class IndexingAgent:
             """,
             (limit,),
         ).fetchall()
-        categories = [
-            {"id": r[0], "name": r[1], "count": int(r[2])}
-            for r in rows
-        ]
+        categories = [{"id": r[0], "name": r[1], "count": int(r[2])} for r in rows]
         # Insert uncategorised entry if required
         cur.execute(
             """
@@ -192,12 +190,12 @@ class IndexingAgent:
     ) -> List[Dict[str, str]]:
         cur = self.conn.cursor()
         if query == "*":
-            sql = "SELECT filename, name, architecture, tags, base_model FROM lora_index"
+            sql = (
+                "SELECT filename, name, architecture, tags, base_model FROM lora_index"
+            )
             params = []
         else:
-            sql = (
-                "SELECT filename, name, architecture, tags, base_model FROM lora_index WHERE lora_index MATCH ?"
-            )
+            sql = "SELECT filename, name, architecture, tags, base_model FROM lora_index WHERE lora_index MATCH ?"
             params = [query]
         if limit is not None:
             sql += " LIMIT ? OFFSET ?"
@@ -216,6 +214,24 @@ class IndexingAgent:
             }
             for r in rows
         ]
+
+    def get_entry(self, filename: str) -> Dict[str, str] | None:
+        """Return a single index entry identified by ``filename``."""
+        cur = self.conn.cursor()
+        row = cur.execute(
+            "SELECT filename, name, architecture, tags, base_model "
+            "FROM lora_index WHERE filename = ?",
+            (filename,),
+        ).fetchone()
+        if row:
+            return {
+                "filename": row[0],
+                "name": row[1],
+                "architecture": row[2],
+                "tags": row[3],
+                "base_model": row[4],
+            }
+        return None
 
     def reindex_all(self) -> None:
         """Index all safetensors files found in the upload directory."""
@@ -251,7 +267,9 @@ class IndexingAgent:
         rows = cur.execute("SELECT id, name FROM categories ORDER BY name").fetchall()
         categories = [{"id": r[0], "name": r[1]} for r in rows]
         if self._uncategorized_exists():
-            categories.insert(0, {"id": self.NO_CATEGORY_ID, "name": self.NO_CATEGORY_NAME})
+            categories.insert(
+                0, {"id": self.NO_CATEGORY_ID, "name": self.NO_CATEGORY_NAME}
+            )
         return categories
 
     def list_categories_with_counts(self) -> List[Dict[str, str]]:
@@ -266,10 +284,7 @@ class IndexingAgent:
             ORDER BY c.name
             """
         ).fetchall()
-        categories = [
-            {"id": r[0], "name": r[1], "count": int(r[2])}
-            for r in rows
-        ]
+        categories = [{"id": r[0], "name": r[1], "count": int(r[2])} for r in rows]
         cur.execute(
             """
             SELECT COUNT(*) FROM lora_index l
@@ -423,9 +438,7 @@ class IndexingAgent:
             "SELECT filename, name FROM lora_index ORDER BY rowid DESC LIMIT ?",
             (limit,),
         ).fetchall()
-        return [
-            {"filename": r[0], "name": r[1]} for r in rows
-        ]
+        return [{"filename": r[0], "name": r[1]} for r in rows]
 
     def recent_categories(self, limit: int = 5) -> List[Dict[str, str]]:
         """Return categories ordered by most recent assignment or creation."""
@@ -441,6 +454,4 @@ class IndexingAgent:
             """,
             (limit,),
         ).fetchall()
-        return [
-            {"id": r[0], "name": r[1]} for r in rows
-        ]
+        return [{"id": r[0], "name": r[1]} for r in rows]
