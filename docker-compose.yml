@@ -1,0 +1,8 @@
+services:
+  mylora:
+    image: asatyr2024/mythosmachina:mylora
+    ports:
+      - '5000:5000'
+    volumes:
+      - ./loradb/uploads:/app/loradb/uploads
+      - ./loradb/search_index:/app/loradb/search_index
