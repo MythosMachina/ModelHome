@@ -78,7 +78,11 @@ class LazyDownloader:
                 f"{self.server_url}/login",
                 data={"username": self.username, "password": self.password},
             )
-            resp.raise_for_status()
+            # Successful login issues a 303 redirect to "/". Treat this as
+            # success instead of raising an exception when ``follow_redirects``
+            # is disabled.
+            if resp.status_code != 303:
+                resp.raise_for_status()
         self.ensure_placeholders()
         while True:
             for event in self.inotify.read(timeout=1000):
