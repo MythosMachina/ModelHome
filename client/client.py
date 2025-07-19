@@ -10,7 +10,7 @@ from __future__ import annotations
 import threading
 import time
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 
 import httpx
 from inotify_simple import INotify, flags
@@ -26,19 +26,29 @@ CONFIG_PATH = Path(__file__).with_name("config.toml")
 class LazyDownloader:
     """Monitor placeholder files and download them on demand."""
 
-    def __init__(self, server_url: str, data_dir: Path, expire_seconds: int = 60):
+    def __init__(
+        self,
+        server_url: str,
+        data_dir: Path,
+        expire_seconds: int = 60,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+    ) -> None:
         self.server_url = server_url.rstrip("/")
         self.data_dir = data_dir
         self.expire_seconds = expire_seconds
+        self.username = username or ""
+        self.password = password or ""
         self.access_times: Dict[Path, float] = {}
         self.inotify = INotify()
         # `inotify_simple` does not provide a combined CLOSE flag, so listen to
         # both close events explicitly
         close_flags = flags.CLOSE_WRITE | flags.CLOSE_NOWRITE
         self.inotify.add_watch(str(self.data_dir), flags.OPEN | close_flags)
+        self.client = httpx.Client(follow_redirects=False)
 
     def ensure_placeholders(self) -> None:
-        resp = httpx.get(f"{self.server_url}/search", params={"query": "*"})
+        resp = self.client.get(f"{self.server_url}/search", params={"query": "*"})
         resp.raise_for_status()
         for entry in resp.json():
             path = self.data_dir / entry["filename"]
@@ -46,7 +56,7 @@ class LazyDownloader:
 
     def download(self, name: str) -> None:
         url = f"{self.server_url}/uploads/{name}"
-        resp = httpx.get(url)
+        resp = self.client.get(url)
         resp.raise_for_status()
         (self.data_dir / name).write_bytes(resp.content)
 
@@ -63,6 +73,12 @@ class LazyDownloader:
                 del self.access_times[path]
 
     def run(self) -> None:
+        if self.username and self.password:
+            resp = self.client.post(
+                f"{self.server_url}/login",
+                data={"username": self.username, "password": self.password},
+            )
+            resp.raise_for_status()
         self.ensure_placeholders()
         while True:
             for event in self.inotify.read(timeout=1000):
@@ -76,18 +92,20 @@ class LazyDownloader:
             self.cleanup()
 
 
-def load_config() -> tuple[str, Path]:
+def load_config() -> tuple[str, Path, str, str]:
     with CONFIG_PATH.open("rb") as fh:
         cfg = tomllib.load(fh)
     server_url = cfg.get("server_url", "http://127.0.0.1:5000")
     data_dir = Path(cfg.get("data_dir", "./lora_mount"))
+    username = cfg.get("username", "")
+    password = cfg.get("password", "")
     data_dir.mkdir(parents=True, exist_ok=True)
-    return server_url, data_dir
+    return server_url, data_dir, username, password
 
 
 def main() -> None:
-    server, data_dir = load_config()
-    downloader = LazyDownloader(server, data_dir)
+    server, data_dir, username, password = load_config()
+    downloader = LazyDownloader(server, data_dir, username=username, password=password)
     thread = threading.Thread(target=downloader.run, daemon=True)
     thread.start()
     print(f"Listening for accesses in {data_dir} (Ctrl+C to stop)")
