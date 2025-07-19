@@ -19,7 +19,13 @@ Edit `config.toml`:
 ```toml
 server_url = "http://127.0.0.1:5000"  # URL of your MyLora server
 data_dir = "./lora_mount"              # Directory for placeholders and downloads
+username = ""                          # Optional: user name for /login
+password = ""                          # Optional: password for /login
 ```
+
+If `username` and `password` are provided, the client performs a login against
+`/login` before requesting any files. Leaving them blank keeps guest mode which
+only allows access to the public showcase.
 
 ## Usage
 
