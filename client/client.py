@@ -32,7 +32,10 @@ class LazyDownloader:
         self.expire_seconds = expire_seconds
         self.access_times: Dict[Path, float] = {}
         self.inotify = INotify()
-        self.inotify.add_watch(str(self.data_dir), flags.OPEN | flags.CLOSE)
+        # `inotify_simple` does not provide a combined CLOSE flag, so listen to
+        # both close events explicitly
+        close_flags = flags.CLOSE_WRITE | flags.CLOSE_NOWRITE
+        self.inotify.add_watch(str(self.data_dir), flags.OPEN | close_flags)
 
     def ensure_placeholders(self) -> None:
         resp = httpx.get(f"{self.server_url}/search", params={"query": "*"})
@@ -68,7 +71,7 @@ class LazyDownloader:
                     if path.stat().st_size == 0:
                         self.download(event.name)
                     self.access_times[path] = time.time()
-                elif event.mask & flags.CLOSE:
+                elif event.mask & (flags.CLOSE_WRITE | flags.CLOSE_NOWRITE):
                     self.access_times[path] = time.time()
             self.cleanup()
 
