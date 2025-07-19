@@ -1,0 +1,3 @@
+httpx
+inotify_simple
+tomli; python_version < '3.11'

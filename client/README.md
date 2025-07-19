@@ -4,6 +4,14 @@ This utility mirrors LoRA files from a running MyLora instance. It creates
 0-byte placeholder files that are replaced with the real `.safetensors` on
 first access.
 
+## Installation
+
+Install the client dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
 ## Configuration
 
 Edit `config.toml`:
