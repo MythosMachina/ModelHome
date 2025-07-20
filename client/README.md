@@ -1,4 +1,5 @@
-# MyLora Lazy Client
+!!BETA!! - NON PRODUCTIVE ONLY!
+# MyLora Lazy Client 
 
 This utility mirrors LoRA files from a running MyLora instance. It creates
 0-byte placeholder files that are replaced with the real `.safetensors` on
