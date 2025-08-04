@@ -18,7 +18,7 @@ pip install -r requirements.txt
 Edit `config.toml`:
 
 ```toml
-server_url = "http://127.0.0.1:5000"  # URL of your MyLora server
+server_url = "http://127.0.0.1:9090"  # URL of your MyLora server
 data_dir = "./lora_mount"              # Directory for placeholders and downloads
 username = ""                          # Optional: user name for /login
 password = ""                          # Optional: password for /login

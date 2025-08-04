@@ -32,7 +32,7 @@ Search LoRA metadata using an SQLite full text query.
 **Example call**
 
 ```bash
-curl "http://{serverip}:5000/search?query=lora"
+curl "http://{serverip}:9090/search?query=lora"
 ```
 
 **Example response**
@@ -63,7 +63,7 @@ Return search results including category information and a random preview image.
 **Example call**
 
 ```bash
-curl "http://{serverip}:5000/grid_data?q=cat&limit=20"
+curl "http://{serverip}:9090/grid_data?q=cat&limit=20"
 ```
 
 **Example response**
@@ -90,7 +90,7 @@ is added with the ID `0`.
 **Example call**
 
 ```bash
-curl "http://{serverip}:5000/categories"
+curl "http://{serverip}:9090/categories"
 ```
 
 **Example response**
@@ -113,7 +113,7 @@ Create a new category by posting its name as form data.
 **Example call**
 
 ```bash
-curl -X POST -F "name=Landscapes" http://{serverip}:5000/categories
+curl -X POST -F "name=Landscapes" http://{serverip}:9090/categories
 ```
 
 **Example response**
@@ -135,7 +135,7 @@ Assign an existing LoRA file to a category.
 
 ```bash
 curl -X POST -F "filename=awesome_lora.safetensors" -F "category_id=1" \
-  http://{serverip}:5000/assign_category
+  http://{serverip}:9090/assign_category
 ```
 
 **Example response**
@@ -158,7 +158,7 @@ Assign multiple LoRA files to a category.
 
 ```bash
 curl -X POST -F "files=a.safetensors" -F "files=b.safetensors" \
-  -F "category_id=1" http://{serverip}:5000/assign_categories
+  -F "category_id=1" http://{serverip}:9090/assign_categories
 ```
 
 **Example response**
@@ -180,7 +180,7 @@ Remove a LoRA file from the given category.
 
 ```bash
 curl -X POST -F "filename=awesome_lora.safetensors" -F "category_id=1" \
-  http://{serverip}:5000/unassign_category
+  http://{serverip}:9090/unassign_category
 ```
 
 **Example response**
@@ -199,7 +199,7 @@ exists the request fails with HTTP status `409`.
 
 ```bash
 curl -X POST -F "files=@awesome_lora.safetensors" \
-  http://{serverip}:5000/upload
+  http://{serverip}:9090/upload
 ```
 
 **Example response**
@@ -224,7 +224,7 @@ also upload a ZIP archive containing previews.
 **Example call**
 
 ```bash
-curl -X POST -F "files=@previews.zip" http://{serverip}:5000/upload_previews
+curl -X POST -F "files=@previews.zip" http://{serverip}:9090/upload_previews
 ```
 
 **Example response**
@@ -244,7 +244,7 @@ Delete a category by its ID.
 **Example call**
 
 ```bash
-curl -X POST -F "category_id=3" http://{serverip}:5000/delete_category
+curl -X POST -F "category_id=3" http://{serverip}:9090/delete_category
 ```
 
 **Example response**
@@ -261,7 +261,7 @@ Delete LoRA or preview files. Provide one or more `files` values as form data.
 
 ```bash
 curl -X POST -F "files=awesome_lora.safetensors" \
-  http://{serverip}:5000/delete
+  http://{serverip}:9090/delete
 ```
 
 **Example response**
@@ -272,4 +272,4 @@ curl -X POST -F "files=awesome_lora.safetensors" \
 
 ---
 
-All endpoints run on port `5000` and return JSON unless noted otherwise.
+All endpoints run on port `9090` and return JSON unless noted otherwise.
