@@ -11,7 +11,7 @@ class AuthManager:
     """Manage user accounts stored in the main SQLite database."""
 
     def __init__(self, db_path: Path | None = None) -> None:
-        self.db_path = Path(db_path or "loradb/search_index/index.db")
+        self.db_path = Path(db_path or config.DB_PATH)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.conn = sqlite3.connect(self.db_path)
         self._ensure_table()
