@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Models</h1>
+<ul class="list-group">
+  {% for m in models %}
+  <li class="list-group-item bg-dark">
+    <a href="/models/{{ m.filename }}" class="link-light">{{ m.name or m.filename }}</a>
+  </li>
+  {% else %}
+  <li class="list-group-item bg-dark">No models found.</li>
+  {% endfor %}
+</ul>
+{% endblock %}
+

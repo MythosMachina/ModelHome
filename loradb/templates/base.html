@@ -18,15 +18,9 @@
         </button>
         <div class="collapse navbar-collapse" id="navcol">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item"><a class="nav-link" href="/showcase">Model Showcase</a></li>
-            {% if user and user.role != 'guest' %}
-            <li class="nav-item"><a class="nav-link" href="/grid">Gallery</a></li>
-            <li class="nav-item"><a class="nav-link" href="/category_admin">Categories</a></li>
-            {% if user.role == 'admin' %}
-            <li class="nav-item"><a class="nav-link" href="/upload_wizard">Upload Wizard</a></li>
-            <li class="nav-item"><a class="nav-link" href="/admin/users">Users</a></li>
-            {% endif %}
-            {% endif %}
+            <li class="nav-item"><a class="nav-link" href="/models">Models</a></li>
+            <li class="nav-item"><a class="nav-link" href="/images">Images</a></li>
+            <li class="nav-item"><a class="nav-link" href="/showcase">Showcase</a></li>
           </ul>
           <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
             {% if user and user.role != 'guest' %}

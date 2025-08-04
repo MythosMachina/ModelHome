@@ -9,7 +9,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 import config
-from loradb.api import indexer
+from loradb.api import indexer, extractor, frontend
 from loradb.api import router as api_router
 from loradb.auth import AuthManager
 
@@ -50,6 +50,9 @@ async def auth_middleware(request: Request, call_next):
         or path.startswith("/login")
         or path == "/showcase"
         or path.startswith("/showcase_detail")
+        or path == "/"
+        or path.startswith("/models")
+        or path.startswith("/images")
     ):
         return await call_next(request)
     if user.get("role") == "guest":
@@ -89,22 +92,64 @@ async def custom_http_exception(request: Request, exc: StarletteHTTPException):
 
 
 @app.get("/", response_class=HTMLResponse)
-async def dashboard(request: Request):
-    template = env.get_template("dashboard.html")
-    stats = {
-        "lora_count": indexer.lora_count(),
-        "preview_count": indexer.preview_count(),
-        "category_count": indexer.category_count(),
-        "storage_volume": indexer.storage_volume(),
-        "top_categories": indexer.top_categories(limit=20),
-    }
-    recent_categories = indexer.recent_categories(limit=5)
-    recent_loras = indexer.recent_loras(limit=5)
+async def index(request: Request):
+    template = env.get_template("index.html")
     return template.render(
-        title="Dashboard",
-        stats=stats,
-        recent_categories=recent_categories,
-        recent_loras=recent_loras,
+        title="Index",
+        model_count=indexer.lora_count(),
+        image_count=indexer.preview_count(),
+        user=request.state.user,
+    )
+
+
+@app.get("/models", response_class=HTMLResponse)
+async def model_index(request: Request):
+    template = env.get_template("modelindex.html")
+    models = indexer.recent_loras(limit=1000)
+    return template.render(title="Models", models=models, user=request.state.user)
+
+
+@app.get("/models/{filename}", response_class=HTMLResponse)
+async def model_detail(request: Request, filename: str):
+    entry = indexer.get_entry(filename)
+    if not entry:
+        raise HTTPException(status_code=404, detail="not found")
+    file_path = Path(config.UPLOAD_DIR) / filename
+    if file_path.exists():
+        entry["metadata"] = extractor.extract(file_path)
+    previews = frontend._find_previews(Path(filename).stem)
+    template = env.get_template("modeldetail.html")
+    return template.render(
+        title=entry.get("name") or filename,
+        model=entry,
+        previews=previews,
+        user=request.state.user,
+    )
+
+
+@app.get("/images", response_class=HTMLResponse)
+async def image_index(request: Request):
+    uploads = Path(config.UPLOAD_DIR)
+    patterns = ["*.png", "*.jpg", "*.jpeg", "*.gif"]
+    images = []
+    for pat in patterns:
+        images.extend([p.name for p in uploads.glob(pat)])
+    template = env.get_template("imageindex.html")
+    return template.render(title="Images", images=sorted(images), user=request.state.user)
+
+
+@app.get("/images/{image}", response_class=HTMLResponse)
+async def image_detail(request: Request, image: str):
+    file_path = Path(config.UPLOAD_DIR) / image
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="not found")
+    stem = Path(image).stem.split("_")[0]
+    model_entry = indexer.get_entry(f"{stem}.safetensors")
+    template = env.get_template("imagedetail.html")
+    return template.render(
+        title=image,
+        image=image,
+        model=model_entry,
         user=request.state.user,
     )
 
