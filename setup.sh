@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
-REPO_URL="https://github.com/AsaTyr2018/MyLora.git"
-INSTALL_DIR="/opt/MyLora"
-SERVICE_FILE="/etc/systemd/system/mylora.service"
+REPO_URL="https://github.com/AsaTyr2018/ModelHome.git"
+INSTALL_DIR="/opt/ModelHome"
+SERVICE_FILE="/etc/systemd/system/modelhome.service"
 VENV_DIR="$INSTALL_DIR/venv"
 
 check_root() {
@@ -14,7 +14,7 @@ check_root() {
 }
 
 clone_repo() {
-    tmpdir="$HOME/MyLora"
+    tmpdir="$HOME/ModelHome"
     rm -rf "$tmpdir"
     git clone "$REPO_URL" "$tmpdir"
     rm -rf "$INSTALL_DIR"
@@ -31,7 +31,7 @@ setup_venv() {
 create_service() {
     cat > "$SERVICE_FILE" <<SERVICE
 [Unit]
-Description=LoRA database web interface
+Description=ModelHome database web interface
 After=network.target
 
 [Service]
@@ -44,35 +44,35 @@ Restart=always
 WantedBy=multi-user.target
 SERVICE
     systemctl daemon-reload
-    systemctl enable mylora.service
+    systemctl enable modelhome.service
 }
 
 install_app() {
     clone_repo
     setup_venv
     create_service
-    systemctl start mylora.service
-    echo "MyLora installed in $INSTALL_DIR"
+    systemctl start modelhome.service
+    echo "ModelHome installed in $INSTALL_DIR"
 }
 
 update_app() {
     if [[ ! -d $INSTALL_DIR ]]; then
-        echo "MyLora is not installed" >&2
+        echo "ModelHome is not installed" >&2
         exit 1
     fi
     git -C "$INSTALL_DIR" pull
     "$VENV_DIR/bin/pip" install -r "$INSTALL_DIR/requirements.txt"
-    systemctl restart mylora.service
-    echo "MyLora updated"
+    systemctl restart modelhome.service
+    echo "ModelHome updated"
 }
 
 uninstall_app() {
-    systemctl stop mylora.service || true
-    systemctl disable mylora.service || true
+    systemctl stop modelhome.service || true
+    systemctl disable modelhome.service || true
     rm -f "$SERVICE_FILE"
     systemctl daemon-reload
     rm -rf "$INSTALL_DIR"
-    echo "MyLora removed"
+    echo "ModelHome removed"
 }
 
 case "$1" in
