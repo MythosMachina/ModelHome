@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoraHome</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white">
+    <header class="flex justify-between items-center px-8 py-4 border-b border-gray-800">
+        <h1 class="text-2xl font-bold">LoraHome</h1>
+        <nav class="flex space-x-6">
+            <a href="#" class="hover:text-gray-300">Models</a>
+            <a href="#" class="hover:text-gray-300">Images</a>
+        </nav>
+        <div class="flex space-x-4">
+            <button class="text-sm hover:text-gray-300">Login</button>
+            <button class="bg-white text-black px-4 py-1 rounded">Sign Up</button>
+        </div>
+    </header>
+
+    <main class="px-8 py-6">
+        <h2 class="text-3xl font-semibold mb-6">New Models</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Card -->
+            <div class="bg-gray-900 rounded-lg overflow-hidden shadow-lg">
+                <img src="https://placehold.co/400x600" class="w-full h-64 object-cover" alt="model image">
+                <div class="p-4">
+                    <span class="bg-gray-700 text-xs px-2 py-1 rounded">lora</span>
+                    <h3 class="mt-2 text-lg font-semibold">Model Name</h3>
+                    <div class="mt-1 space-x-2 text-xs">
+                        <span class="bg-gray-700 px-2 py-1 rounded">anime</span>
+                        <span class="bg-gray-700 px-2 py-1 rounded">character</span>
+                    </div>
+                    <p class="text-xs mt-2 text-gray-400">Base: IL</p>
+                    <div class="mt-4 flex justify-between items-center text-sm text-gray-400">
+                        <span>by Author</span>
+                        <span>326.62 MB</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Repeat as needed -->
+        </div>
+    </main>
+</body>
+</html>
