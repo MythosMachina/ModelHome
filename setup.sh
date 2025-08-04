@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-REPO_URL="https://github.com/AsaTyr2018/ModelHome.git"
+REPO_URL="https://github.com/MythosMachina/ModelHome.git"
 INSTALL_DIR="/opt/ModelHome"
 SERVICE_FILE="/etc/systemd/system/modelhome.service"
 VENV_DIR="$INSTALL_DIR/venv"
