@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Welcome to MyLora</h1>
+<p class="lead">Explore {{ model_count }} models and {{ image_count }} images.</p>
+<p>
+  <a class="btn btn-primary me-2" href="/models">Browse Models</a>
+  <a class="btn btn-secondary" href="/images">Browse Images</a>
+ </p>
+{% endblock %}
+

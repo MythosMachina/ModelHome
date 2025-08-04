@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Images</h1>
+<div class="row">
+  {% for img in images %}
+  <div class="col-md-3 mb-4">
+    <a href="/images/{{ img }}"><img src="/uploads/{{ img }}" class="img-fluid rounded"></a>
+  </div>
+  {% else %}
+  <p>No images found.</p>
+  {% endfor %}
+</div>
+{% endblock %}
+

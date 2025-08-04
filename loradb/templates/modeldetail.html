@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ model.name or model.filename }}</h1>
+<ul class="list-unstyled">
+  <li><strong>Filename:</strong> {{ model.filename }}</li>
+  {% if model.architecture %}<li><strong>Architecture:</strong> {{ model.architecture }}</li>{% endif %}
+  {% if model.tags %}<li><strong>Tags:</strong> {{ model.tags }}</li>{% endif %}
+  {% if model.base_model %}<li><strong>Base model:</strong> {{ model.base_model }}</li>{% endif %}
+</ul>
+{% if previews %}
+<div class="row">
+  {% for img in previews %}
+  <div class="col-md-3 mb-4">
+    <a href="{{ img }}" target="_blank"><img src="{{ img }}" class="img-fluid rounded"></a>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+<a class="btn btn-primary" href="/uploads/{{ model.filename }}" download>Download</a>
+{% endblock %}
+

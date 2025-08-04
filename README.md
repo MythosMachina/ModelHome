@@ -54,46 +54,22 @@ To set up the first admin user, run the following command in the root folder of 
 python3 ./usersetup.py {user} {password}
 ```
 
-### Docker builder
-
-An alternative setup runs MyLora inside Docker. Execute the builder script and
-start the created container:
-
-```bash
-cd docker_setup
-python builder.py
-cd app
-docker compose up -d
-```
-
-To update the container later on, run `python update.py` from the same
-directory.
-
 ## Pages overview
 
-### Main site `/`
-The landing page shows basic statistics and quick links to the gallery and the upload wizard.
+### Index `/`
+Overview of all models and images with quick navigation.
 
-![grafik](https://github.com/user-attachments/assets/41cdf81e-d71b-4c66-bbb2-22cbecfe8191)
+### Models `/models`
+List of all uploaded models with search and filter options.
 
-### Gallery `/grid`
-Grid view of all LoRAs with infinite scrolling, search box and category filter. Items link to their detail page.
-![grafik](https://github.com/user-attachments/assets/278fd9dd-9a68-4def-8234-9920ed2d06a4)
+### Model Detail `/models/<filename>`
+Detailed information about a selected model including download link and preview images.
 
-### Detail view `/detail/<filename>`
-Shows all preview images, extracted metadata and category management options for a single LoRA.
+### Images `/images`
+Overview of all uploaded images with sorting and filtering.
 
-![grafik](https://github.com/user-attachments/assets/9db90546-bd4c-47f1-8eb0-dc66a1531849)
-
-### Upload wizard `/upload_wizard`
-Guided upload page that first asks for the `.safetensors` file and then its previews. Progress bars indicate upload status and the page redirects to the detail view when done.
-
-![grafik](https://github.com/user-attachments/assets/30a14ca7-bd06-4af6-9e10-12a728b07c06)
-
-### Category admin `/category_admin`
-Manage all categories in one place. Create new entries and remove unused ones. A table lists how many LoRAs are assigned to each category.
-
-![grafik](https://github.com/user-attachments/assets/28cfaab7-c6fc-471e-8ef1-87a21fcae47f)
+### Image Detail `/images/<image>`
+Shows the selected image in high resolution and information about the related model.
 
 ## Bulk import
 Use `bulk_import.py` to ingest an existing collection:
