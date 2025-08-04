@@ -15,5 +15,8 @@ STATIC_DIR = BASE_DIR / "loradb" / "static"
 # Directory containing Jinja2 templates
 TEMPLATE_DIR = BASE_DIR / "loradb" / "templates"
 
+# Location of the SQLite database for users and search index
+DB_PATH = Path.home() / ".modelhome" / "index.db"
+
 # Secret key for session cookies
 SECRET_KEY = "change_this_secret"
