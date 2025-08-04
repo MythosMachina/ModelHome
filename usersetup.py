@@ -3,7 +3,7 @@
 
 import argparse
 
-from loradb.auth import AuthManager
+from mylora.auth import AuthManager
 
 
 def main() -> None:
