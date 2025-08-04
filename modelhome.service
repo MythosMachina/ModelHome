@@ -1,0 +1,13 @@
+[Unit]
+Description=ModelHome database web interface
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/ModelHome
+ExecStart=/opt/ModelHome/venv/bin/python /opt/ModelHome/main.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
