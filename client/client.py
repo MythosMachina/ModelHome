@@ -99,7 +99,7 @@ class LazyDownloader:
 def load_config() -> tuple[str, Path, str, str]:
     with CONFIG_PATH.open("rb") as fh:
         cfg = tomllib.load(fh)
-    server_url = cfg.get("server_url", "http://127.0.0.1:5000")
+    server_url = cfg.get("server_url", "http://127.0.0.1:9090")
     data_dir = Path(cfg.get("data_dir", "./lora_mount"))
     username = cfg.get("username", "")
     password = cfg.get("password", "")

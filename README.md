@@ -44,7 +44,7 @@ sudo ./setup.sh update       # update
 sudo ./setup.sh uninstall    # remove
 ```
 
-The service will be available on [http://{serverip}:5000](http://{serverip}:5000).
+The service will be available on [http://{serverip}:9090](http://{serverip}:9090).
 
 ## Admin User Setup (!Important!)
 
